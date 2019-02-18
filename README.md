@@ -15,11 +15,11 @@ Scripts are going to use Service Account auth to access G Suite.
 
 From the manual https://developers.google.com/api-client-library/python/auth/service-accounts follow the steps to create Service Account.
 
-Create JSON key file for the Service Account and save it in a safe place.
+Create JSON secrets file for the Service Account and save it in a safe place.
 
 Note the Service Account email - you will need it.
 
-You don't need to Enable G Suite Domain-wide Delegation - you can use Service Accouna'st email @...iam.gserviceaccount.com to share access to specific folder in Drive etc with Service Account.
+You don't need to Enable G Suite Domain-wide Delegation - you can use Service Account's email @...iam.gserviceaccount.com to share access to specific folder in Drive etc with Service Account.
 
 ## Required envs
-
+- SA_SECRETS_FILE - path to the Service Account JSON secrets.
