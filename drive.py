@@ -23,8 +23,9 @@ if __name__ == "__main__":
     # Set parser and parse args
     parser = argparse.ArgumentParser(description='Script to automate specific operations with G Suite Drive.')
     parser.add_argument("--debug", dest="debug", help="enable debug", action="store_true")
-    parser.add_argument("--dry-run", dest="dry_run", help="no new objects created or commits to db on reports", action="store_true")
-    parser.add_argument("--list-sa-files", dest="list_sa_files", help="list all files available to service account", action="store_true")
+    parser.add_argument("--cd", dest="cd", help="operate in folder specified by ID")
+    parser.add_argument("--ls", dest="ls", help="list files, optionaly with --cd", action="store_true")
+    parser.add_argument("--mkdir", dest="mkdir", help="create folder, use with --cd")
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -42,32 +43,69 @@ if __name__ == "__main__":
         os.chdir(WORK_DIR)
 
         # Check env vars and connects
-        if args.list_sa_files:
+        if args.ls or args.mkdir is not None:
             
             if SA_SECRETS_FILE is None:
                 logger.error("Env var SA_SECRETS_FILE missing")
                 sys.exit(1)
         
-        if args.list_sa_files:
+        if args.ls or args.mkdir is not None:
             
             credentials = service_account.Credentials.from_service_account_file(SA_SECRETS_FILE, scopes=SCOPES)
-            drive_service = build('drive', 'v2', credentials=credentials)
+            drive_service = build('drive', 'v3', credentials=credentials)
 
         # Do tasks
-        if args.list_sa_files:
+        if args.ls:
             
             try:
 
                 page_token = None
                 while True:
 
-                    response = drive_service.files().list(spaces='drive', fields='nextPageToken, items(id, title)', pageToken=page_token).execute()
-                    for file in response.get('items', []):
-                        logger.info('Found file: {0} {1}'.format(file.get('title'), file.get('id')))
+                    if args.cd is not None:
+                        q = "'{0}' in parents".format(args.cd)
+                    else:
+                        q = ""
+
+                    response = drive_service.files().list(pageSize=100, fields="nextPageToken, files(id, name)", pageToken=page_token, q=q).execute()
+                    items = response.get('files', [])
+
+                    if not items:
+                        print('No files found')
+                        logger.info('No files found')
+
+                    else:
+                        for item in items:
+                            print('{0} {1}'.format(item['id'], item['name']))
+                            logger.info('ls: {0} {1}'.format(item['id'], item['name']))
+
                     page_token = response.get('nextPageToken', None)
 
                     if page_token is None:
                         break
+
+            except Exception as e:
+                logger.error("Caught exception on execution:")
+                logger.exception(e)
+                sys.exit(1)
+
+        if args.mkdir:
+            
+            if args.cd is None:
+                logger.error("--cd FOLDER_ID is required for --mkdir command")
+                sys.exit(1)
+
+            try:
+
+                body = {
+                    'name': args.mkdir,
+                    'mimeType': "application/vnd.google-apps.folder",
+                    'parents': [args.cd]
+                }
+
+                folder = drive_service.files().create(body = body).execute()
+                print('Folder ID: {0}'.format(folder['id']))
+                logger.info('Folder ID: {0}'.format(folder['id']))
 
             except Exception as e:
                 logger.error("Caught exception on execution:")
