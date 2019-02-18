@@ -2,9 +2,14 @@
 G Suite scripts to automate specific operations with Drive, Gmail etc. Used to generate invoices and reports, save them as PDF, create Gmail drafts with PDFs and so on.
 
 # Usage
+## Commands
+Commands use [IDs of Drive files](https://developers.google.com/drive/api/v3/about-files#file_ids).
+
+- `drive.py --ls` - List files, optionaly in folder specified with `--cd ID`.
+- `drive.py --mkdir "Some Folder Name"` - Create folder inside other folder specified with `--cd ID`.
 ## Required Projects and APIs
 ### Developers Project
-Projects are managed on https://console.developers.google.com/ .
+Projects are managed on [Developers Console](https://console.developers.google.com/).
 - Create project.
 - Enable APIs for the project:
   - Apps Script API
@@ -13,7 +18,7 @@ Projects are managed on https://console.developers.google.com/ .
 
 Scripts are going to use Service Account auth to access G Suite.
 
-From the manual https://developers.google.com/api-client-library/python/auth/service-accounts follow the steps to create Service Account.
+From the [manual](https://developers.google.com/api-client-library/python/auth/service-accounts) follow the steps to create Service Account.
 
 Create JSON secrets file for the Service Account and save it in a safe place.
 
