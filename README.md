@@ -1,5 +1,5 @@
 # About
-G Suite scripts to automate specific operations with Drive, Gmail etc. Used to generate invoices and reports, save them as PDF, create Gmail drafts with PDFs and so on.
+Command line python scripts for G Suite to automate specific operations with Drive, Gmail etc. Used to generate invoices and reports, save them as PDF, create Gmail drafts with PDFs and so on.
 
 # Usage
 ## Commands
