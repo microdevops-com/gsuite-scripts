@@ -5,10 +5,10 @@ Command line python scripts for G Suite to automate operations with Drive, Docs,
 Used to generate invoices and reports (actually, any kind of documents, it depends only on the template document used), save them as PDF, create Gmail drafts with PDFs, add data to sheets.
 
 API versions used:
-  - [Drive API v3](https://developers.google.com/drive/api/v3/quickstart/python).
-  - [Docs API v1](https://developers.google.com/docs/api/quickstart/python).
-  - [Sheets API v4](https://developers.google.com/sheets/api/quickstart/python).
-  - [Gmail API v1](https://developers.google.com/gmail/api/quickstart/python).
+  - [Drive API v3](https://developers.google.com/drive/api/v3/quickstart/python)
+  - [Docs API v1](https://developers.google.com/docs/api/quickstart/python)
+  - [Sheets API v4](https://developers.google.com/sheets/api/quickstart/python)
+  - [Gmail API v1](https://developers.google.com/gmail/api/quickstart/python)
 
 # Usage
 ## Commands
@@ -35,7 +35,7 @@ optional arguments:
 ```
 ## Required Projects, APIs, permissions
 ### Developers Project
-Go to [Developers Console](https://console.developers.google.com/), authorize with your G Suite admin and Create new project within your organization.
+Go to [Developers Console](https://console.developers.google.com/), authorize with your G Suite admin and create new project within your organization.
 
 Go to API Library and enable the following APIs for the project:
   - Google Drive API
@@ -77,9 +77,11 @@ Edit Service Account settings in Service Accounts menu.
 
 Check Enable G Suite Domain-wide Delegation.
 
+Note Client ID (all digits) of Service Account after enabling.
+
 Go to G Suite Admin -> Security -> Advanced -> Manage API Client Access.
 
-In the Client name field enter the service account's Client ID (all digits).
+In the Client name field enter the service account's Client ID.
 
 Set Scopes for Gmail:
 ```
