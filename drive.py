@@ -26,6 +26,7 @@ if __name__ == "__main__":
     parser.add_argument("--cd", dest="cd", help="operate in folder specified by google drive ID CD")
     parser.add_argument("--name", dest="name", help="give new file name NAME, if required by command")
     parser.add_argument("--ls", dest="ls", help="returns ID<space>name of files, optionally with --cd", action="store_true")
+    parser.add_argument("--rm", dest="rm", help="delete file or folder by ID RM")
     parser.add_argument("--mkdir", dest="mkdir", help="create folder named MKDIR, only if it does not exist yet, returns ID of created or found folder, use always with --cd")
     parser.add_argument("--cp", dest="cp", help="copy file referenced by google drive ID CP only if it does not exist yet, returns ID of created file if created, use always with --cd and --name")
     args = parser.parse_args()
@@ -86,6 +87,24 @@ if __name__ == "__main__":
                 if page_token is None:
                     break
 
+            logger.info("Finished script")
+            sys.exit(0)
+
+        if args.rm:
+            
+            try:
+
+                drive_service.files().delete(fileId=args.rm).execute()
+
+            except Exception as e:
+                logger.error('Deleting {0} failed'.format(args.rm))
+                logger.info("Caught exception on execution:")
+                logger.info(e)
+                sys.exit(1)
+            
+            logger.info("Finished script")
+            sys.exit(0)
+
         if args.mkdir:
             
             if args.cd is None:
@@ -109,7 +128,7 @@ if __name__ == "__main__":
                         'parents': [args.cd]
                     }
 
-                    folder = drive_service.files().create(body = body).execute()
+                    folder = drive_service.files().create(body=body).execute()
                     print('{0}'.format(folder['id']))
                     logger.info('{0}'.format(folder['id']))
 
@@ -124,6 +143,9 @@ if __name__ == "__main__":
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
+            
+            logger.info("Finished script")
+            sys.exit(0)
 
         if args.cp:
             
@@ -151,7 +173,7 @@ if __name__ == "__main__":
                         'parents': [args.cd]
                     }
 
-                    new_file = drive_service.files().copy(fileId=args.cp, body = body).execute()
+                    new_file = drive_service.files().copy(fileId=args.cp, body=body).execute()
                     print('{0}'.format(new_file['id']))
                     logger.info('{0}'.format(new_file['id']))
 
@@ -161,10 +183,11 @@ if __name__ == "__main__":
                 logger.info(e)
                 sys.exit(1)
 
+            logger.info("Finished script")
+            sys.exit(0)
+
     # Reroute catched exception to log
     except Exception as e:
         logger.exception(e)
         logger.info("Finished script with errors")
         sys.exit(1)
-
-    logger.info("Finished script")
