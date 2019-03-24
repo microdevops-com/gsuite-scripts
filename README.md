@@ -15,24 +15,46 @@ API versions used:
 Commands use [IDs of Drive files](https://developers.google.com/drive/api/v3/about-files#file_ids).
 
 ```
-./drive.py --help
-usage: drive.py [-h] [--debug] [--cd CD] [--name NAME] [--ls] [--mkdir MKDIR]
-                [--cp CP]
+usage: drive.py [-h] [--debug]
+                (--ls ID | --rm ID | --mkdir ID NAME | --cp ID CD NAME)
 
 Script to automate specific operations with G Suite Drive.
 
 optional arguments:
-  -h, --help     show this help message and exit
-  --debug        enable debug
-  --cd CD        operate in folder specified by google drive ID CD
-  --name NAME    give new file name NAME, if required by command
-  --ls           returns ID<space>name of files, optionally with --cd
-  --mkdir MKDIR  create folder named MKDIR, only if it does not exist yet,
-                 returns ID of created or found folder, use always with --cd
-  --cp CP        copy file referenced by google drive ID CP only if it does
-                 not exist yet, returns ID of created file if created, use
-                 always with --cd and --name
+  -h, --help       show this help message and exit
+  --debug          enable debug
+  --ls ID          returns id<space>name of files available in folder ID, use
+                   ID = ALL to list all available files
+  --rm ID          delete file ID (folders are also files in drive)
+  --mkdir ID NAME  create folder NAME within folder ID, only if NAME does not
+                   exist yet, returns ID of created or found folder
+  --cp ID CD NAME  copy source file ID to folder CD with NAME, only if it does
+                   not exist yet, returns ID of created file if created
 ```
+```
+usage: docs.py [-h] [--debug]
+               (--get-as-json ID | --get-table-index ID N | --replace-all-text ID JSON | --insert-table-row ID TABLE_INDEX BELOW_ROW_NUMBER JSON)
+
+Script to automate specific operations with G Suite Docs.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --debug               enable debug
+  --get-as-json ID      get google drive doc ID as json
+  --get-table-index ID N
+                        get startIndex of table N within google drive doc ID,
+                        N starts from 1
+  --replace-all-text ID JSON
+                        replace all text templates defined by JSON (e.g.
+                        '{"__KEY1__": "Value 1", "__KEY2__": "Value 2"}')
+                        within google drive doc ID
+  --insert-table-row ID TABLE_INDEX BELOW_ROW_NUMBER JSON
+                        insert row defined by JSON (e.g. '{"Cell 1", "Cell
+                        2"}') into table with startIndex TABLE_INDEX (use
+                        --get-table-index to get startIndex) below row number
+                        BELOW_ROW_NUMBER within google drive doc ID
+```
+
 ## Required Projects, APIs, permissions
 ### Developers Project
 Go to [Developers Console](https://console.developers.google.com/), authorize with your G Suite admin and create new project within your organization.
