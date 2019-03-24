@@ -22,14 +22,15 @@ if __name__ == "__main__":
 
     # Set parser and parse args
     parser = argparse.ArgumentParser(description='Script to automate specific operations with G Suite Docs.')
-    parser.add_argument("--debug", dest="debug", help="enable debug", action="store_true")
-    parser.add_argument("--get", dest="get", help="get as JSON google drive doc referenced by ID GET")
-    parser.add_argument("--get-table-index", dest="get_table_index", help="get startIndex of table within google drive doc referenced by ID GET_TABLE_INDEX, always use with --table")
-    parser.add_argument("--table", dest="table", help="table number TABLE to search within google drive doc, starting with 1")
-    parser.add_argument("--replace-all-text", dest="replace_all_text", help="replace all text templates within google drive doc referenced by ID REPLACE_ALL_TEXT, always use with --templates")
-    parser.add_argument("--templates", dest="templates", help="JSON of templates, e.g. --templates '{\"__KEY1__\": \"Value 1\", \"__KEY2__\": \"Value 2\"}'", type=json.loads)
-    parser.add_argument("--insert-table-row", dest="insert_table_row", help="insert row into table within google drive doc referenced by ID INSERT_TABLE_ROW, always use with --table-index TABLE and --row")
-    parser.add_argument("--table-index", dest="table_index", help="table with startIndex TABLE_INDEX within google drive doc to which insert the row")
+    parser.add_argument("--debug",              dest="debug",               help="enable debug",                                                                    action="store_true")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--get-as-json",         dest="get_as_json",         help="get google drive doc ID as json",                                                 nargs=1,    metavar=("ID"))
+    group.add_argument("--get-table-index",     dest="get_table_index",     help="get startIndex of table N within google drive doc ID, N starts from 1",           nargs=2,    metavar=("ID", "N"))
+    group.add_argument("--replace-all-text",    dest="replace_all_text",
+        help="replace all text templates defined by JSON (e.g. '{\"__KEY1__\": \"Value 1\", \"__KEY2__\": \"Value 2\"}') within google drive doc ID",               nargs=2,    metavar=("ID", "JSON"))
+    group.add_argument("--insert-table-row",    dest="insert_table_row",
+        help="insert row defined by JSON (e.g. '{\"Cell 1\", \"Cell 2\"}') into table with startIndex TABLE_INDEX (use --get-table-index to get startIndex) below row number BELOW_ROW_NUMBER within google drive doc ID",
+                                                                                                                                                                    nargs=4,    metavar=("ID", "TABLE_INDEX", "BELOW_ROW_NUMBER", "JSON"))
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -55,16 +56,18 @@ if __name__ == "__main__":
         docs_service = build('docs', 'v1', credentials=credentials)
 
         # Do tasks
-        if args.get:
+        if args.get_as_json:
 
             try:
 
-                response = docs_service.documents().get(documentId=args.get).execute()
+                doc_id, = args.get_as_json
+
+                response = docs_service.documents().get(documentId=doc_id).execute()
                 print("{0}".format(json.dumps(response, indent=4)))
                 logger.info("{0}".format(json.dumps(response)))
 
             except Exception as e:
-                logger.error('Getting document {0} failled'.format(args.get))
+                logger.error('Getting document {0} failled'.format(doc_id))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
@@ -74,13 +77,11 @@ if __name__ == "__main__":
 
         if args.get_table_index:
 
-            if args.table is None:
-                logger.error("--table TABLE is required for --get-table-index")
-                sys.exit(1)
-            
             try:
 
-                response = docs_service.documents().get(documentId=args.get_table_index).execute()
+                doc_id, table_n = args.get_table_index
+                
+                response = docs_service.documents().get(documentId=doc_id).execute()
                 
                 content = response['body']['content']
                 table_index = 0
@@ -90,13 +91,13 @@ if __name__ == "__main__":
                     if "table" in element:
 
                         table_index += 1
-                        if int(table_index) == int(args.table):
+                        if int(table_index) == int(table_n):
 
                             print("{0}".format(element['startIndex']))
                             logger.info("{0}".format(element['startIndex']))
 
             except Exception as e:
-                logger.error('Getting table {0} index from document {1} failed'.format(args.table, args.get_table_index))
+                logger.error('Getting table {0} index from document {1} failed'.format(table_n, doc_id))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
@@ -106,15 +107,14 @@ if __name__ == "__main__":
 
         if args.replace_all_text:
 
-            if args.templates is None:
-                logger.error("--templates JSON is required for --replace-all-text")
-                sys.exit(1)
-            
             try:
 
+                doc_id, json_str = args.replace_all_text
+                json_dict = json.loads(json_str)
+                
                 requests = []
 
-                for template in args.templates:
+                for template in json_dict:
 
                     requests = requests + [
                         {
@@ -123,17 +123,17 @@ if __name__ == "__main__":
                                     'text': template,
                                     'matchCase':  'true'
                                 },
-                                'replaceText': args.templates[template]
+                                'replaceText': json_dict[template]
                             }
                         }
                     ]
 
-                response = docs_service.documents().batchUpdate(documentId=args.replace_all_text, body={'requests': requests}).execute()
+                response = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
                 print("{0}".format(response))
                 logger.info("{0}".format(response))
 
             except Exception as e:
-                logger.error('Document {0} replacing all text templates failed'.format(args.replace_all_text))
+                logger.error('Document {0} replacing all text templates {1} failed'.format(doc_id, json_str))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
@@ -143,20 +143,21 @@ if __name__ == "__main__":
 
         if args.insert_table_row:
             
-            if args.table_index is None:
-                logger.error("--table-index TABLE_INDEX is required for --insert-table-row")
-                sys.exit(1)
-
             try:
 
+                doc_id, table_index, below_row_number, json_str = args.insert_table_row
+                json_dict = json.loads(json_str)
+                row_index = int(below_row_number) - 1
+                table_index = int(table_index)
+                
                 requests = [
                     {
                         'insertTableRow': {
                             'tableCellLocation': {
                                 'tableStartLocation': {
-                                    'index': args.table_index
+                                    'index': table_index
                                 },
-                                'rowIndex': 1,
+                                'rowIndex': row_index,
                                 'columnIndex': 0
                             },
                             'insertBelow': 'true'
@@ -164,12 +165,12 @@ if __name__ == "__main__":
                     }
                 ]
 
-                response = docs_service.documents().batchUpdate(documentId=args.insert_table_row, body={'requests': requests}).execute()
+                response = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
                 print("{0}".format(response))
                 logger.info("{0}".format(response))
 
             except Exception as e:
-                logger.error('Document {0} inserting row into table failed'.format(args.insert_table_row))
+                logger.error('Document {0} inserting row json {1} below {2} into table {3} failed'.format(doc_id, json_str, below_row_number, table_index))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
