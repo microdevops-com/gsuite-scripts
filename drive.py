@@ -27,8 +27,8 @@ if __name__ == "__main__":
     parser.add_argument("--name", dest="name", help="give new file name NAME, if required by command")
     parser.add_argument("--ls", dest="ls", help="returns ID<space>name of files, optionally with --cd", action="store_true")
     parser.add_argument("--rm", dest="rm", help="delete file or folder by ID RM")
-    parser.add_argument("--mkdir", dest="mkdir", help="create folder named MKDIR, only if it does not exist yet, returns ID of created or found folder, use always with --cd")
-    parser.add_argument("--cp", dest="cp", help="copy file referenced by google drive ID CP only if it does not exist yet, returns ID of created file if created, use always with --cd and --name")
+    parser.add_argument("--mkdir", dest="mkdir", help="create folder named MKDIR, only if it does not exist yet, returns ID of created or found folder, always use with --cd")
+    parser.add_argument("--cp", dest="cp", help="copy file referenced by google drive ID CP only if it does not exist yet, returns ID of created file if created, always use with --cd and --name")
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         if args.mkdir:
             
             if args.cd is None:
-                logger.error("--cd ID is required for --mkdir command")
+                logger.error("--cd ID is required for --mkdir")
                 sys.exit(1)
 
             try:
@@ -150,11 +150,11 @@ if __name__ == "__main__":
         if args.cp:
             
             if args.cd is None:
-                logger.error("--cd ID is required for --cp command")
+                logger.error("--cd ID is required for --cp")
                 sys.exit(1)
             
             if args.name is None:
-                logger.error("--name NAME is required for --cp command")
+                logger.error("--name NAME is required for --cp")
                 sys.exit(1)
 
             try:
