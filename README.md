@@ -33,7 +33,7 @@ optional arguments:
 ```
 ```
 usage: docs.py [-h] [--debug]
-               (--get-as-json ID | --get-table-index ID N | --replace-all-text ID JSON | --insert-table-row ID TABLE_INDEX BELOW_ROW_NUMBER JSON)
+               (--get-as-json ID | --replace-all-text ID JSON | --insert-table-row ID TABLE_NUM BELOW_ROW_NUMBER JSON)
 
 Script to automate specific operations with G Suite Docs.
 
@@ -41,18 +41,14 @@ optional arguments:
   -h, --help            show this help message and exit
   --debug               enable debug
   --get-as-json ID      get google drive doc ID as json
-  --get-table-index ID N
-                        get startIndex of table N within google drive doc ID,
-                        N starts from 1
   --replace-all-text ID JSON
                         replace all text templates defined by JSON (e.g.
                         '{"__KEY1__": "Value 1", "__KEY2__": "Value 2"}')
                         within google drive doc ID
-  --insert-table-row ID TABLE_INDEX BELOW_ROW_NUMBER JSON
-                        insert row defined by JSON (e.g. '{"Cell 1", "Cell
-                        2"}') into table with startIndex TABLE_INDEX (use
-                        --get-table-index to get startIndex) below row number
-                        BELOW_ROW_NUMBER within google drive doc ID
+  --insert-table-row ID TABLE_NUM BELOW_ROW_NUMBER JSON
+                        insert row defined by JSON (e.g. '["Cell 1", "Cell
+                        2"]') into TABLE_NUM (table count starts from 1) below
+                        row number BELOW_ROW_NUMBER within google drive doc ID
 ```
 
 ## Required Projects, APIs, permissions

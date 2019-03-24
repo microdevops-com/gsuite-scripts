@@ -18,6 +18,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 SA_SECRETS_FILE = os.environ.get("SA_SECRETS_FILE")
 
 # Main
+
 if __name__ == "__main__":
 
     # Set parser and parse args
@@ -40,6 +41,7 @@ if __name__ == "__main__":
         logger = set_logger(logging.ERROR, LOG_DIR, LOG_FILE)
 
     # Catch exception to logger
+
     try:
         logger.info(LOGO)
         logger.info("Starting script")
@@ -56,6 +58,7 @@ if __name__ == "__main__":
         drive_service = build('drive', 'v3', credentials=credentials)
 
         # Do tasks
+
         if args.ls:
             
             cd_folder, = args.ls
