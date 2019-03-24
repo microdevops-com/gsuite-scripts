@@ -22,13 +22,15 @@ if __name__ == "__main__":
 
     # Set parser and parse args
     parser = argparse.ArgumentParser(description='Script to automate specific operations with G Suite Drive.')
-    parser.add_argument("--debug", dest="debug", help="enable debug", action="store_true")
-    parser.add_argument("--cd", dest="cd", help="operate in folder specified by google drive ID CD")
-    parser.add_argument("--name", dest="name", help="give new file name NAME, if required by command")
-    parser.add_argument("--ls", dest="ls", help="returns ID<space>name of files, optionally with --cd", action="store_true")
-    parser.add_argument("--rm", dest="rm", help="delete file or folder by ID RM")
-    parser.add_argument("--mkdir", dest="mkdir", help="create folder named MKDIR, only if it does not exist yet, returns ID of created or found folder, always use with --cd")
-    parser.add_argument("--cp", dest="cp", help="copy file referenced by google drive ID CP only if it does not exist yet, returns ID of created file if created, always use with --cd and --name")
+    parser.add_argument("--debug",              dest="debug",               help="enable debug",                                                                    action="store_true")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--ls",                  dest="ls",
+        help="returns id<space>name of files available in folder ID, use ID = ALL to list all available files",                                                     nargs=1,    metavar=("ID"))
+    group.add_argument("--rm",                  dest="rm",                  help="delete file ID (folders are also files in drive)",                                nargs=1,    metavar=("ID"))
+    group.add_argument("--mkdir",               dest="mkdir",
+        help="create folder NAME within folder ID, only if NAME does not exist yet, returns ID of created or found folder",                                         nargs=2,    metavar=("ID", "NAME"))
+    group.add_argument("--cp",                  dest="cp",
+        help="copy source file ID to folder CD with NAME, only if it does not exist yet, returns ID of created file if created",                                    nargs=3,    metavar=("ID", "CD", "NAME"))
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -56,13 +58,15 @@ if __name__ == "__main__":
         # Do tasks
         if args.ls:
             
+            cd_folder, = args.ls
+            
             page_token = None
             while True:
 
-                if args.cd is not None:
-                    q = "'{0}' in parents".format(args.cd)
-                else:
+                if cd_folder == "ALL":
                     q = ""
+                else:
+                    q = "'{0}' in parents".format(cd_folder)
 
                 # Try to list files, suppress errors
                 try:
@@ -70,7 +74,7 @@ if __name__ == "__main__":
                     items = response.get('files', [])
                     page_token = response.get('nextPageToken', None)
                 except Exception as e:
-                    logger.error('Listing in folder ID {0} failed'.format(args.cd))
+                    logger.error('Listing in folder ID {0} failed'.format(cd_folder))
                     logger.info("Caught exception on execution:")
                     logger.info(e)
                     sys.exit(1)
@@ -91,13 +95,15 @@ if __name__ == "__main__":
             sys.exit(0)
 
         if args.rm:
-            
+           
+            file_id, = args.rm
+
             try:
 
-                drive_service.files().delete(fileId=args.rm).execute()
+                drive_service.files().delete(fileId=file_id).execute()
 
             except Exception as e:
-                logger.error('Deleting {0} failed'.format(args.rm))
+                logger.error('Deleting {0} failed'.format(file_id))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
@@ -107,14 +113,12 @@ if __name__ == "__main__":
 
         if args.mkdir:
             
-            if args.cd is None:
-                logger.error("--cd ID is required for --mkdir")
-                sys.exit(1)
+            in_id, folder_name = args.mkdir
 
             try:
 
                 # Query if the same file already exists
-                q = "'{0}' in parents and name = '{1}'".format(args.cd, args.mkdir)
+                q = "'{0}' in parents and name = '{1}'".format(in_id, folder_name)
 
                 # Get only one page with 1 result
                 response = drive_service.files().list(pageSize=1, fields="files(id, name)", q=q).execute()
@@ -123,9 +127,9 @@ if __name__ == "__main__":
                 if not items:
 
                     body = {
-                        'name': args.mkdir,
+                        'name': folder_name,
                         'mimeType': "application/vnd.google-apps.folder",
-                        'parents': [args.cd]
+                        'parents': [in_id]
                     }
 
                     folder = drive_service.files().create(body=body).execute()
@@ -139,7 +143,7 @@ if __name__ == "__main__":
                     logger.info('{0}'.format(items[0]['id']))
 
             except Exception as e:
-                logger.error('Creating {0} in folder ID {1} failed'.format(args.mkdir, args.cd))
+                logger.error('Creating {0} in folder ID {1} failed'.format(folder_name, in_id))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
@@ -149,18 +153,12 @@ if __name__ == "__main__":
 
         if args.cp:
             
-            if args.cd is None:
-                logger.error("--cd ID is required for --cp")
-                sys.exit(1)
+            source_id, cd_id, file_name = args.cp
             
-            if args.name is None:
-                logger.error("--name NAME is required for --cp")
-                sys.exit(1)
-
             try:
 
                 # Query if the same file already exists
-                q = "'{0}' in parents and name = '{1}'".format(args.cd, args.name)
+                q = "'{0}' in parents and name = '{1}'".format(cd_id, file_name)
 
                 # Get only one page with 1 result
                 response = drive_service.files().list(pageSize=1, fields="files(id, name)", q=q).execute()
@@ -169,16 +167,16 @@ if __name__ == "__main__":
                 if not items:
 
                     body = {
-                        'name': args.name,
-                        'parents': [args.cd]
+                        'name': file_name,
+                        'parents': [cd_id]
                     }
 
-                    new_file = drive_service.files().copy(fileId=args.cp, body=body).execute()
+                    new_file = drive_service.files().copy(fileId=source_id, body=body).execute()
                     print('{0}'.format(new_file['id']))
                     logger.info('{0}'.format(new_file['id']))
 
             except Exception as e:
-                logger.error('Copying of {0} with name {1} in folder ID {2} failed'.format(args.cp, args.name, args.cd))
+                logger.error('Copying of {0} with name {1} in folder ID {2} failed'.format(source_id, file_name, cd_id))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
