@@ -23,15 +23,16 @@ if __name__ == "__main__":
 
     # Set parser and parse args
     parser = argparse.ArgumentParser(description='Script to automate specific operations with G Suite Drive.')
-    parser.add_argument("--debug",              dest="debug",               help="enable debug",                                                                    action="store_true")
+    parser.add_argument("--debug",              dest="debug",               help="enable debug",                        action="store_true")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--ls",                  dest="ls",
-        help="returns id<space>name of files available in folder ID, use ID = ALL to list all available files",                                                     nargs=1,    metavar=("ID"))
-    group.add_argument("--rm",                  dest="rm",                  help="delete file ID (folders are also files in drive)",                                nargs=1,    metavar=("ID"))
-    group.add_argument("--mkdir",               dest="mkdir",
-        help="create folder NAME within folder ID, only if NAME does not exist yet, returns ID of created or found folder",                                         nargs=2,    metavar=("ID", "NAME"))
-    group.add_argument("--cp",                  dest="cp",
-        help="copy source file ID to folder CD with NAME, only if it does not exist yet, returns ID of created file if created",                                    nargs=3,    metavar=("ID", "CD", "NAME"))
+    ls_help = "returns id<space>name of files available in folder ID, use ID = ALL to list all available files"
+    group.add_argument("--ls",                  dest="ls",                  help=ls_help,                               nargs=1,    metavar=("ID"))
+    rm_help = "delete file ID (folders are also files in drive)"
+    group.add_argument("--rm",                  dest="rm",                  help=rm_help,                               nargs=1,    metavar=("ID"))
+    mkdir_help = "create folder NAME within folder ID, only if NAME does not exist yet, returns ID of created or found folder"
+    group.add_argument("--mkdir",               dest="mkdir",               help=mkdir_help,                            nargs=2,    metavar=("ID", "NAME"))
+    cp_help = "copy source file ID to folder CD with NAME, only if it does not exist yet, returns ID of created file if created"
+    group.add_argument("--cp",                  dest="cp",                  help=cp_help,                               nargs=3,    metavar=("ID", "CD", "NAME"))
     args = parser.parse_args()
 
     # Set logger and console debug

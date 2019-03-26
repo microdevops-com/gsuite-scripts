@@ -23,14 +23,13 @@ if __name__ == "__main__":
 
     # Set parser and parse args
     parser = argparse.ArgumentParser(description='Script to automate specific operations with G Suite Docs.')
-    parser.add_argument("--debug",              dest="debug",               help="enable debug",                                                                    action="store_true")
+    parser.add_argument("--debug",              dest="debug",               help="enable debug",                        action="store_true")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--get-as-json",         dest="get_as_json",         help="get google drive doc ID as json",                                                 nargs=1,    metavar=("ID"))
-    group.add_argument("--replace-all-text",    dest="replace_all_text",
-        help="replace all text templates defined by JSON (e.g. '{\"__KEY1__\": \"Value 1\", \"__KEY2__\": \"Value 2\"}') within google drive doc ID",               nargs=2,    metavar=("ID", "JSON"))
-    group.add_argument("--insert-table-row",    dest="insert_table_row",
-        help="insert row defined by JSON (e.g. '[\"Cell 1\", \"Cell 2\"]') into TABLE_NUM (table count starts from 1) below row number BELOW_ROW_NUMBER within google drive doc ID",
-                                                                                                                                                                    nargs=4,    metavar=("ID", "TABLE_NUM", "BELOW_ROW_NUMBER", "JSON"))
+    group.add_argument("--get-as-json",         dest="get_as_json",         help="get google drive doc ID as json",     nargs=1,    metavar=("ID"))
+    replace_all_text_help = "replace all text templates defined by JSON (e.g. '{\"__KEY1__\": \"Value 1\", \"__KEY2__\": \"Value 2\"}') within google drive doc ID"
+    group.add_argument("--replace-all-text",    dest="replace_all_text",    help=replace_all_text_help,                 nargs=2,    metavar=("ID", "JSON"))
+    insert_table_row_help = "insert row defined by JSON (e.g. '[\"Cell 1\", \"Cell 2\"]') into TABLE_NUM (table count starts from 1) below row number BELOW_ROW_NUMBER within google drive doc ID"
+    group.add_argument("--insert-table-row",    dest="insert_table_row",    help=insert_table_row_help,                 nargs=4,    metavar=("ID", "TABLE_NUM", "BELOW_ROW_NUMBER", "JSON"))
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -66,8 +65,8 @@ if __name__ == "__main__":
                 doc_id, = args.get_as_json
 
                 response = docs_service.documents().get(documentId=doc_id).execute()
-                print("{0}".format(json.dumps(response, indent=4)))
-                logger.info("{0}".format(json.dumps(response)))
+                print(json.dumps(response, indent=4))
+                logger.info(json.dumps(response))
 
             except Exception as e:
                 logger.error('Getting document {0} failled'.format(doc_id))
