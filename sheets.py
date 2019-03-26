@@ -30,6 +30,10 @@ if __name__ == "__main__":
                           RENDER = 'FORMATTED_VALUE' or 'UNFORMATTED_VALUE' or 'FORMULA',
                           DATETIME_RENDER = 'SERIAL_NUMBER' or 'FORMATTED_STRING'"""
     group.add_argument("--get-as-json",         dest="get_as_json",         help=get_as_json_help,                      nargs=6,    metavar=("ID", "SHEET", "RANGE", "DIMENSION", "RENDER", "DATETIME_RENDER"))
+    append_data_help = """append table defined by RANGE (e.g. A:B) within google drive spreadsheet ID on sheet SHEET,
+                         data (one or multiple rows or columns) is provided with JSON (e.g. [["Cell 1 1", "Cell 1 2"], ["Cell 2 1", "Cell 2 2"]]),
+                         use DIMENSION = 'ROWS' or 'COLUMNS'"""
+    group.add_argument("--append-data",         dest="append_data",         help=append_data_help,                       nargs=5,    metavar=("ID", "SHEET", "RANGE", "DIMENSION", "JSON"))
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -70,6 +74,32 @@ if __name__ == "__main__":
 
                 print(json.dumps(values, indent=4))
                 logger.info(json.dumps(values))
+
+            except Exception as e:
+                logger.error('Getting spreadsheet {0} sheet {1} range {2} failed'.format(spreadsheet_id, sheet_id, range_id))
+                logger.info("Caught exception on execution:")
+                logger.info(e)
+                sys.exit(1)
+            
+            logger.info("Finished script")
+            sys.exit(0)
+
+        if args.append_data:
+            
+            try:
+
+                spreadsheet_id, sheet_id, range_id, dimension, json_str = args.append_data
+                json_dict = json.loads(json_str)
+
+                request = {
+                        "majorDimension": dimension,
+                        "values": json_dict
+                }
+
+                response = sheets_service.spreadsheets().values().append(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body=request).execute()
+                print(response)
+                logger.info(response)
+
 
             except Exception as e:
                 logger.error('Getting spreadsheet {0} sheet {1} range {2} failed'.format(spreadsheet_id, sheet_id, range_id))

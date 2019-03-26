@@ -101,8 +101,8 @@ if __name__ == "__main__":
                     ]
 
                 response = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
-                print("{0}".format(response))
-                logger.info("{0}".format(response))
+                print(response)
+                logger.info(response)
 
             except Exception as e:
                 logger.error('Document {0} replacing all text templates {1} failed'.format(doc_id, json_str))
@@ -187,8 +187,8 @@ if __name__ == "__main__":
                 ]
 
                 response = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
-                print("{0}".format(response))
-                logger.info("{0}".format(response))
+                print(response)
+                logger.info(response)
 
                 # Fill row values
                 # As per https://developers.google.com/docs/api/how-tos/best-practices data should be filled backwards
@@ -213,8 +213,8 @@ if __name__ == "__main__":
                     list_n += 1
 
                 response = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
-                print("{0}".format(response))
-                logger.info("{0}".format(response))
+                print(response)
+                logger.info(response)
 
             except Exception as e:
                 logger.error('Document {0} inserting row json {1} below {2} into table {3} failed'.format(doc_id, json_str, below_row_number, table_num))

@@ -50,6 +50,28 @@ optional arguments:
                         2"]') into TABLE_NUM (table count starts from 1) below
                         row number BELOW_ROW_NUMBER within google drive doc ID
 ```
+```
+usage: sheets.py [-h] [--debug]
+                 (--get-as-json ID SHEET RANGE DIMENSION RENDER DATETIME_RENDER | --append-data ID SHEET RANGE DIMENSION JSON)
+
+Script to automate specific operations with G Suite Docs.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --debug               enable debug
+  --get-as-json ID SHEET RANGE DIMENSION RENDER DATETIME_RENDER
+                        get google drive spreadsheet ID range RANGE on sheet
+                        SHEET as json, use DIMENSION = 'ROWS' or 'COLUMNS',
+                        RENDER = 'FORMATTED_VALUE' or 'UNFORMATTED_VALUE' or
+                        'FORMULA', DATETIME_RENDER = 'SERIAL_NUMBER' or
+                        'FORMATTED_STRING'
+  --append-data ID SHEET RANGE DIMENSION JSON
+                        append table defined by RANGE (e.g. A:B) within google
+                        drive spreadsheet ID on sheet SHEET, data (one or
+                        multiple rows or columns) is provided with JSON (e.g.
+                        [["Cell 1 1", "Cell 1 2"], ["Cell 2 1", "Cell 2 2"]]),
+                        use DIMENSION = 'ROWS' or 'COLUMNS'
+```
 
 ## Required Projects, APIs, permissions
 ### Developers Project
