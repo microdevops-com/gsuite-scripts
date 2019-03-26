@@ -128,7 +128,7 @@ Set Scopes for Gmail:
 https://mail.google.com/,https://www.googleapis.com/auth/gmail.compose,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/gmail.readonly,https://www.googleapis.com/auth/gmail.send
 ```
 ## Required envs
-- SA_SECRETS_FILE - path to the Service Account JSON secrets.
+- `SA_SECRETS_FILE` - path to the Service Account JSON secrets.
 
 # Notes on Script API
 Script API and JS Scripts are **NOT** used - people often use those mechanisms to manipulate data within docs and sheets, but there are native API calls for docs and sheets that do the very same.
