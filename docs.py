@@ -11,8 +11,9 @@ from google.oauth2 import service_account
 
 # Constants
 LOGO="G Suite Scripts / Docs"
-WORK_DIR = "/opt/sysadmws/gsuite-scripts"
-LOG_DIR = "/opt/sysadmws/gsuite-scripts/log"
+LOG_DIR = os.environ.get("LOG_DIR")
+if LOG_DIR is None:
+    LOG_DIR = "/opt/sysadmws/gsuite-scripts/log"
 LOG_FILE = "docs.log"
 SCOPES = ['https://www.googleapis.com/auth/documents']
 SA_SECRETS_FILE = os.environ.get("SA_SECRETS_FILE")
@@ -44,9 +45,6 @@ if __name__ == "__main__":
         
         logger.info(LOGO)
         logger.info("Starting script")
-
-        # Chdir to work dir
-        os.chdir(WORK_DIR)
 
         # Check env vars and connects
         if SA_SECRETS_FILE is None:

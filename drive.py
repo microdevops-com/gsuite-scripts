@@ -8,11 +8,14 @@ from sysadmws_common import *
 from googleapiclient.discovery import build
 import oauth2client.client
 from google.oauth2 import service_account
+import io
+from apiclient.http import MediaIoBaseDownload
 
 # Constants
 LOGO="G Suite Scripts / Drive"
-WORK_DIR = "/opt/sysadmws/gsuite-scripts"
-LOG_DIR = "/opt/sysadmws/gsuite-scripts/log"
+LOG_DIR = os.environ.get("LOG_DIR")
+if LOG_DIR is None:
+    LOG_DIR = "/opt/sysadmws/gsuite-scripts/log"
 LOG_FILE = "drive.log"
 SCOPES = ['https://www.googleapis.com/auth/drive']
 SA_SECRETS_FILE = os.environ.get("SA_SECRETS_FILE")
@@ -33,6 +36,7 @@ if __name__ == "__main__":
     group.add_argument("--mkdir",               dest="mkdir",               help=mkdir_help,                            nargs=2,    metavar=("ID", "NAME"))
     cp_help = "copy source file ID to folder CD with NAME, only if it does not exist yet, returns ID of created file if created"
     group.add_argument("--cp",                  dest="cp",                  help=cp_help,                               nargs=3,    metavar=("ID", "CD", "NAME"))
+    group.add_argument("--pdf",                 dest="pdf",                 help="download file ID as pdf file NAME",   nargs=2,    metavar=("ID", "NAME"))
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -46,9 +50,6 @@ if __name__ == "__main__":
     try:
         logger.info(LOGO)
         logger.info("Starting script")
-
-        # Chdir to work dir
-        os.chdir(WORK_DIR)
 
         # Check env vars and connects
         if SA_SECRETS_FILE is None:
@@ -181,6 +182,32 @@ if __name__ == "__main__":
 
             except Exception as e:
                 logger.error('Copying of {0} with name {1} in folder ID {2} failed'.format(source_id, file_name, cd_id))
+                logger.info("Caught exception on execution:")
+                logger.info(e)
+                sys.exit(1)
+
+            logger.info("Finished script")
+            sys.exit(0)
+
+        if args.pdf:
+            
+            file_id, file_name = args.pdf
+            
+            try:
+
+                request = drive_service.files().export_media(fileId=file_id, mimeType='application/pdf')
+
+                fh = io.FileIO(file_name, "wb")
+                downloader = MediaIoBaseDownload(fh, request)
+                done = False
+                while done is False:
+                    status, done = downloader.next_chunk()
+                    print("Download {0}".format(status.progress() * 100))
+                    logger.info("Download {0}".format(status.progress() * 100))
+                fh.close()
+
+            except Exception as e:
+                logger.error('Downloading of {0} as {1} failed'.format(file_id, file_name))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)

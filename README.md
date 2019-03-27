@@ -129,6 +129,7 @@ https://mail.google.com/,https://www.googleapis.com/auth/gmail.compose,https://w
 ```
 ## Required envs
 - `SA_SECRETS_FILE` - path to the Service Account JSON secrets.
+- `LOG_DIR` - path to put logs into.
 
 # Notes on Script API
 Script API and JS Scripts are **NOT** used - people often use those mechanisms to manipulate data within docs and sheets, but there are native API calls for docs and sheets that do the very same.
