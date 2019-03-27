@@ -10,6 +10,7 @@ import oauth2client.client
 from google.oauth2 import service_account
 import io
 from apiclient.http import MediaIoBaseDownload
+from apiclient.http import MediaFileUpload
 
 # Constants
 LOGO="G Suite Scripts / Drive"
@@ -37,6 +38,8 @@ if __name__ == "__main__":
     cp_help = "copy source file ID to folder CD with NAME, only if it does not exist yet, returns ID of created file if created"
     group.add_argument("--cp",                  dest="cp",                  help=cp_help,                               nargs=3,    metavar=("ID", "CD", "NAME"))
     group.add_argument("--pdf",                 dest="pdf",                 help="download file ID as pdf file NAME",   nargs=2,    metavar=("ID", "NAME"))
+    upload_help = "upload local FILE as NAME to google drive folder CD, only if it does not exist yet, returns ID of created file if created"
+    group.add_argument("--upload",              dest="upload",              help=upload_help,                           nargs=3,    metavar=("FILE", "CD", "NAME"))
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -208,6 +211,40 @@ if __name__ == "__main__":
 
             except Exception as e:
                 logger.error('Downloading of {0} as {1} failed'.format(file_id, file_name))
+                logger.info("Caught exception on execution:")
+                logger.info(e)
+                sys.exit(1)
+
+            logger.info("Finished script")
+            sys.exit(0)
+
+        if args.upload:
+            
+            file_local, cd_id, file_name = args.upload
+            
+            try:
+
+                # Query if the same file already exists
+                q = "'{0}' in parents and name = '{1}'".format(cd_id, file_name)
+
+                # Get only one page with 1 result
+                response = drive_service.files().list(pageSize=1, fields="files(id, name)", q=q).execute()
+                items = response.get('files', [])
+
+                if not items:
+
+                    body = {
+                        'name': file_name,
+                        'parents': [cd_id]
+                    }
+
+                    media = MediaFileUpload(file_local)
+                    new_file = drive_service.files().create(body=body, media_body=media, fields='id').execute()
+                    print('{0}'.format(new_file['id']))
+                    logger.info('{0}'.format(new_file['id']))
+
+            except Exception as e:
+                logger.error('Uploading of {0} with name {1} in folder ID {2} failed'.format(file_local, file_name, cd_id))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
