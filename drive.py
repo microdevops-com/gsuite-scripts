@@ -51,6 +51,7 @@ if __name__ == "__main__":
     # Catch exception to logger
 
     try:
+
         logger.info(LOGO)
         logger.info("Starting script")
 
