@@ -1,6 +1,4 @@
 # About
-**Work In Progress**
-
 Command line python scripts for G Suite to automate operations with Drive, Docs, Sheets and Gmail.
 Used to generate invoices and reports (actually, any kind of documents, it depends only on the template document used), save them as PDF, create Gmail drafts with PDFs, add data to sheets.
 
