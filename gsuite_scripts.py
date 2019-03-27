@@ -16,6 +16,7 @@ from email import encoders
 # Constants
 DOCS_SCOPES = ['https://www.googleapis.com/auth/documents']
 DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
+SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 GMAIL_SCOPES = [
     'https://mail.google.com/',
     'https://www.googleapis.com/auth/gmail.compose',
@@ -23,7 +24,6 @@ GMAIL_SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
     'https://www.googleapis.com/auth/gmail.send'
 ]
-SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 def docs_get_as_json(sa_secrets_file, doc_id):
 
@@ -340,6 +340,43 @@ def drive_upload(sa_secrets_file, file_local, cd_id, file_name):
     except:
         raise
 
+def sheets_get_as_json(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dimension, render, datetime_render):
+
+    try:
+
+        credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=SHEETS_SCOPES)
+        sheets_service = build('sheets', 'v4', credentials=credentials)
+
+        sheet = sheets_service.spreadsheets()
+        result = sheet.values().get(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), majorDimension=dimension, valueRenderOption=render, dateTimeRenderOption=datetime_render).execute()
+        values = result.get('values', [])
+
+        return values
+
+    except:
+        raise
+
+def sheets_append_data(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dimension, json_str):
+
+    try:
+
+        credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=SHEETS_SCOPES)
+        sheets_service = build('sheets', 'v4', credentials=credentials)
+
+        json_dict = json.loads(json_str)
+        
+        request = {
+            "majorDimension": dimension,
+            "values": json_dict
+        }
+
+        response = sheets_service.spreadsheets().values().append(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body=request).execute()
+
+        return response
+
+    except:
+        raise
+
 def gmail_create_draft(sa_secrets_file, gmail_user, message_from, message_to, message_cc, message_bcc, message_subject, message_text, attach_str):
 
     try:
@@ -402,43 +439,6 @@ def gmail_list_messages(sa_secrets_file, gmail_user):
                 return_list.append(message['snippet'])
             
         return return_list
-
-    except:
-        raise
-
-def sheets_get_as_json(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dimension, render, datetime_render):
-
-    try:
-
-        credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=SHEETS_SCOPES)
-        sheets_service = build('sheets', 'v4', credentials=credentials)
-
-        sheet = sheets_service.spreadsheets()
-        result = sheet.values().get(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), majorDimension=dimension, valueRenderOption=render, dateTimeRenderOption=datetime_render).execute()
-        values = result.get('values', [])
-
-        return values
-
-    except:
-        raise
-
-def sheets_append_data(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dimension, json_str):
-
-    try:
-
-        credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=SHEETS_SCOPES)
-        sheets_service = build('sheets', 'v4', credentials=credentials)
-
-        json_dict = json.loads(json_str)
-        
-        request = {
-            "majorDimension": dimension,
-            "values": json_dict
-        }
-
-        response = sheets_service.spreadsheets().values().append(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body=request).execute()
-
-        return response
 
     except:
         raise

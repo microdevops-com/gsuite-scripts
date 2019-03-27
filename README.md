@@ -97,7 +97,28 @@ optional arguments:
                         new\nlines\nперевірка\nチェックする' '["a.pdf", "b.pdf"]'
   --list-messages USER  list messages available to gmail USER
 ```
+## Required envs for commands
+- `SA_SECRETS_FILE` - path to the Service Account JSON secrets.
+- `LOG_DIR` - path to put logs into.
 
+## Functions
+Functions could be used in other scripts:
+```
+from gsuite_scripts import *
+response = docs_get_as_json(SA_SECRETS_FILE, doc_id)
+response = docs_replace_all_text(SA_SECRETS_FILE, doc_id, json_str)
+response_new_row, response_values = docs_insert_table_row(SA_SECRETS_FILE, doc_id, table_num, below_row_number, json_str)
+items = drive_ls(SA_SECRETS_FILE, cd_folder)
+response = drive_rm(SA_SECRETS_FILE, file_id)
+response = drive_mkdir(SA_SECRETS_FILE, in_id, folder_name)
+response = drive_cp(SA_SECRETS_FILE, source_id, cd_id, file_name)
+response = drive_pdf(SA_SECRETS_FILE, file_id, file_name)
+response = drive_upload(SA_SECRETS_FILE, file_local, cd_id, file_name)
+response = sheets_get_as_json(SA_SECRETS_FILE, spreadsheet_id, sheet_id, range_id, dimension, render, datetime_render)
+response = sheets_append_data(SA_SECRETS_FILE, spreadsheet_id, sheet_id, range_id, dimension, json_str)
+draft_id, draft_message = gmail_create_draft(SA_SECRETS_FILE, gmail_user, message_from, message_to, message_cc, message_bcc, message_subject, message_text, attach_str)
+response = gmail_list_messages(SA_SECRETS_FILE, gmail_user)
+```
 ## Required Projects, APIs, permissions
 ### Developers Project
 Go to [Developers Console](https://console.developers.google.com/), authorize with your G Suite admin and create new project within your organization.
@@ -152,10 +173,6 @@ Set Scopes for Gmail:
 ```
 https://mail.google.com/,https://www.googleapis.com/auth/gmail.compose,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/gmail.readonly,https://www.googleapis.com/auth/gmail.send
 ```
-## Required envs
-- `SA_SECRETS_FILE` - path to the Service Account JSON secrets.
-- `LOG_DIR` - path to put logs into.
-
 # Notes on Script API
 Script API and JS Scripts are **NOT** used - people often use those mechanisms to manipulate data within docs and sheets, but there are native API calls for docs and sheets that do the very same.
 Also, Script API [cannot be used with service accounts](https://issuetracker.google.com/issues/36763096), which is the simpliest OAuth way.
