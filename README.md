@@ -76,6 +76,27 @@ optional arguments:
                         [["Cell 1 1", "Cell 1 2"], ["Cell 2 1", "Cell 2 2"]]),
                         use DIMENSION = 'ROWS' or 'COLUMNS'
 ```
+```
+usage: gmail.py [-h] [--debug]
+                (--create-draft USER FROM TO CC BCC SUBJECT TEXT ATTACH | --list-messages USER)
+
+Script to automate specific operations with Gmail.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --debug               enable debug
+  --create-draft USER FROM TO CC BCC SUBJECT TEXT ATTACH
+                        create draft inside USER gmail, from email FROM to
+                        email(s) TO, CC, BCC with SUBJECT and TEXT, and attach
+                        local files listed with json list ATTACH, e.g.
+                        --create-draft me@example.com '"Me Myself"
+                        <me@example.com>' '"Client 1" <client1@acme.com>,
+                        "Client 2" <client2@acme.com>' '"Someone Other"
+                        cc@acme.com' 'bcc@acme.com' 'Subject may contain UTF -
+                        перевірка チェックする' 'Message may contain UTF and
+                        new\nlines\nперевірка\nチェックする' '["a.pdf", "b.pdf"]'
+  --list-messages USER  list messages available to gmail USER
+```
 
 ## Required Projects, APIs, permissions
 ### Developers Project
