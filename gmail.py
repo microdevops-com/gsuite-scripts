@@ -3,31 +3,14 @@
 
 # Import common code
 from sysadmws_common import *
-
-# Import ext libs
-from googleapiclient.discovery import build
-import oauth2client.client
-from google.oauth2 import service_account
-import base64
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-import mimetypes
-from email import encoders
+from gsuite_scripts import *
 
 # Constants
 LOGO="G Suite Scripts / Gmail"
 LOG_DIR = os.environ.get("LOG_DIR")
 if LOG_DIR is None:
-    LOG_DIR = "/opt/sysadmws/gsuite-scripts/log"
+    LOG_DIR = "log"
 LOG_FILE = "gmail.log"
-SCOPES = [
-        'https://mail.google.com/',
-        'https://www.googleapis.com/auth/gmail.compose',
-        #'https://www.googleapis.com/auth/gmail.metadata', with this scope you cannot get messages
-        'https://www.googleapis.com/auth/gmail.readonly',
-        'https://www.googleapis.com/auth/gmail.send'
-]
 SA_SECRETS_FILE = os.environ.get("SA_SECRETS_FILE")
 
 # Main
@@ -67,44 +50,14 @@ if __name__ == "__main__":
 
         if args.create_draft:
             
-            gmail_user, message_from, message_to, message_cc, message_bcc, message_subject, message_text, attach_str = args.create_draft
-            message_text_new_lines = message_text.replace('\\n', '\n')
-            attach_dict = json.loads(attach_str)
-
             try:
-
-                credentials = service_account.Credentials.from_service_account_file(SA_SECRETS_FILE, scopes=SCOPES)
-                delegated_credentials = credentials.with_subject(gmail_user)
-                gmail_service = build('gmail', 'v1', credentials=delegated_credentials)
             
-                message = MIMEMultipart()
-                message['From'] = message_from
-                message['To'] = message_to
-                message['Cc'] = message_cc
-                message['Bcc'] = message_bcc
-                message['Subject'] = message_subject
-                
-                message.attach(MIMEText(message_text_new_lines, "plain"))
+                gmail_user, message_from, message_to, message_cc, message_bcc, message_subject, message_text, attach_str = args.create_draft
 
-                for file_name in attach_dict:
+                draft_id, draft_message = gmail_create_draft(SA_SECRETS_FILE, gmail_user, message_from, message_to, message_cc, message_bcc, message_subject, message_text, attach_str)
 
-                    with open(file_name, "rb") as attachment:
-
-                        part = MIMEBase("application", "octet-stream")
-                        part.set_payload(attachment.read())
-
-                    encoders.encode_base64(part)
-                    part.add_header("Content-Disposition", "attachment", filename=os.path.basename(file_name))
-                    message.attach(part)
-                
-                b64_bytes = base64.urlsafe_b64encode(message.as_bytes())
-                b64_string = b64_bytes.decode()
-                message_body = {'raw': b64_string}
-                message = {'message': message_body}
-                draft = gmail_service.users().drafts().create(userId='me', body=message).execute()
-
-                print("Draft {0} with message {1} created".format(draft['id'], draft['message']))
-                logger.info("Draft {0} with message {1} created".format(draft['id'], draft['message']))
+                print("Draft {0} with message {1} created".format(draft_id, draft_message))
+                logger.info("Draft {0} with message {1} created".format(draft_id, draft_message))
 
             except Exception as e:
                 logger.error('Creating draft for user {0} failed'.format(gmail_user))
@@ -117,25 +70,15 @@ if __name__ == "__main__":
         
         if args.list_messages:
             
-            gmail_user, = args.list_messages
-
             try:
+            
+                gmail_user, = args.list_messages
 
-                credentials = service_account.Credentials.from_service_account_file(SA_SECRETS_FILE, scopes=SCOPES)
-                delegated_credentials = credentials.with_subject(gmail_user)
-                gmail_service = build('gmail', 'v1', credentials=delegated_credentials)
+                response = gmail_list_messages(SA_SECRETS_FILE, gmail_user)
 
-                response = gmail_service.users().messages().list(userId=gmail_user).execute()
-
-                if 'messages' in response:
-                    
-                    for msg in response['messages']:
-                        
-                        message = gmail_service.users().messages().get(userId=gmail_user, id=msg['id'], format='raw').execute()
-                        print(msg)
-                        print(message['snippet'])
-                        logger.info(msg)
-                        logger.info(message['snippet'])
+                for item in response:
+                    print(item)
+                    logger.info(item)
 
             except Exception as e:
                 logger.error('Listing messages for user {0} failed'.format(gmail_user))

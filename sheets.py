@@ -3,19 +3,14 @@
 
 # Import common code
 from sysadmws_common import *
-
-# Import ext libs
-from googleapiclient.discovery import build
-import oauth2client.client
-from google.oauth2 import service_account
+from gsuite_scripts import *
 
 # Constants
 LOGO="G Suite Scripts / Sheets"
 LOG_DIR = os.environ.get("LOG_DIR")
 if LOG_DIR is None:
-    LOG_DIR = "/opt/sysadmws/gsuite-scripts/log"
+    LOG_DIR = "log"
 LOG_FILE = "sheets.log"
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 SA_SECRETS_FILE = os.environ.get("SA_SECRETS_FILE")
 
 # Main
@@ -55,9 +50,6 @@ if __name__ == "__main__":
             logger.error("Env var SA_SECRETS_FILE missing")
             sys.exit(1)
         
-        credentials = service_account.Credentials.from_service_account_file(SA_SECRETS_FILE, scopes=SCOPES)
-        sheets_service = build('sheets', 'v4', credentials=credentials)
-
         # Do tasks
 
         if args.get_as_json:
@@ -66,12 +58,10 @@ if __name__ == "__main__":
 
                 spreadsheet_id, sheet_id, range_id, dimension, render, datetime_render = args.get_as_json
 
-                sheet = sheets_service.spreadsheets()
-                result = sheet.values().get(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), majorDimension=dimension, valueRenderOption=render, dateTimeRenderOption=datetime_render).execute()
-                values = result.get('values', [])
+                response = sheets_get_as_json(SA_SECRETS_FILE, spreadsheet_id, sheet_id, range_id, dimension, render, datetime_render)
 
-                print(json.dumps(values, indent=4))
-                logger.info(json.dumps(values))
+                print(json.dumps(response, indent=4))
+                logger.info(json.dumps(response))
 
             except Exception as e:
                 logger.error('Getting spreadsheet {0} sheet {1} range {2} failed'.format(spreadsheet_id, sheet_id, range_id))
@@ -87,14 +77,8 @@ if __name__ == "__main__":
             try:
 
                 spreadsheet_id, sheet_id, range_id, dimension, json_str = args.append_data
-                json_dict = json.loads(json_str)
 
-                request = {
-                        "majorDimension": dimension,
-                        "values": json_dict
-                }
-
-                response = sheets_service.spreadsheets().values().append(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body=request).execute()
+                response = sheets_append_data(SA_SECRETS_FILE, spreadsheet_id, sheet_id, range_id, dimension, json_str)
                 print(response)
                 logger.info(response)
 
