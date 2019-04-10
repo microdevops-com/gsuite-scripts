@@ -24,8 +24,10 @@ if __name__ == "__main__":
     group.add_argument("--get-as-json",         dest="get_as_json",         help="get google drive doc ID as json",     nargs=1,    metavar=("ID"))
     replace_all_text_help = "replace all text templates defined by JSON (e.g. '{\"__KEY1__\": \"Value 1\", \"__KEY2__\": \"Value 2\"}') within google drive doc ID"
     group.add_argument("--replace-all-text",    dest="replace_all_text",    help=replace_all_text_help,                 nargs=2,    metavar=("ID", "JSON"))
-    insert_table_row_help = "insert row defined by JSON (e.g. '[\"Cell 1\", \"Cell 2\"]') into TABLE_NUM (table count starts from 1) below row number BELOW_ROW_NUMBER within google drive doc ID"
+    insert_table_row_help = "insert row defined by JSON (e.g. '[\"Cell 1\", \"Cell 2\"]') into TABLE_NUM (table, row count starts from 1) below row number BELOW_ROW_NUMBER within google drive doc ID"
     group.add_argument("--insert-table-row",    dest="insert_table_row",    help=insert_table_row_help,                 nargs=4,    metavar=("ID", "TABLE_NUM", "BELOW_ROW_NUMBER", "JSON"))
+    delete_table_row_help = "delete row ROW_NUMBER from TABLE_NUM (table, row count starts from 1) within google drive doc ID"
+    group.add_argument("--delete-table-row",    dest="delete_table_row",    help=delete_table_row_help,                 nargs=3,    metavar=("ID", "TABLE_NUM", "ROW_NUMBER"))
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -100,6 +102,23 @@ if __name__ == "__main__":
                 logger.info(response_new_row)
                 print(response_values)
                 logger.info(response_values)
+
+            except Exception as e:
+                logger.error('Document {0} inserting row json {1} below {2} into table {3} failed'.format(doc_id, json_str, below_row_number, table_num))
+                logger.info("Caught exception on execution:")
+                logger.info(e)
+                sys.exit(1)
+
+        if args.delete_table_row:
+            
+            try:
+
+                doc_id, table_num, row_number = args.delete_table_row
+                
+                response_delete_row = docs_delete_table_row(SA_SECRETS_FILE, doc_id, table_num, row_number)
+
+                print(response_delete_row)
+                logger.info(response_delete_row)
 
             except Exception as e:
                 logger.error('Document {0} inserting row json {1} below {2} into table {3} failed'.format(doc_id, json_str, below_row_number, table_num))

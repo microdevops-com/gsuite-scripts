@@ -174,6 +174,82 @@ def docs_insert_table_row(sa_secrets_file, doc_id, table_num, below_row_number, 
     except:
         raise
 
+def docs_delete_table_row(sa_secrets_file, doc_id, table_num, row_number):
+
+    try:
+
+        credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DOCS_SCOPES)
+        docs_service = build('docs', 'v1', credentials=credentials)
+
+        row_index = int(row_number) - 1
+        table_num = int(table_num)
+
+        # Get table index
+
+        response = docs_service.documents().get(documentId=doc_id).execute()
+
+        content = response['body']['content']
+        table_n = 0
+        table_index = None
+
+        for element in content:
+
+            if "table" in element:
+
+                table_n += 1
+                if table_n == table_num:
+
+                    # Save table startIndex
+                    table_index = element['startIndex']
+
+                    # Save endIndex of the row which we will delete
+                    # We can calc new row first cell startIndex by this endIndex
+
+                    table = element['table']
+                    rows = table['tableRows']
+                    row_n = 0
+                    row_end_index = None
+
+                    # Check if requested row_num is out of table rows
+                    if int(row_number) > len(rows):
+                        raise ValueError("Table {0} has less than {1} rows ({2} actually)".format(table_num, row_number, len(rows)))
+
+                    for row in rows: # For some reason row[x] doesn't work, so just iterate
+
+                        row_n += 1
+                        if row_n == int(row_number):
+
+                            row_end_index = int(row['endIndex'])
+
+                    if row_end_index is None:
+                        raise ValueError("Row {0} index for table {1} not found".format(row_number, table_num))
+
+        if table_index is None:
+            raise ValueError("Table index for TABLE_NUM = {0} not found".format(table_num))
+
+        # Insert new row
+
+        requests = [
+            {
+                'deleteTableRow': {
+                    'tableCellLocation': {
+                        'tableStartLocation': {
+                            'index': table_index
+                        },
+                        'rowIndex': row_index,
+                        'columnIndex': 0
+                    }
+                }
+            }
+        ]
+
+        response_delete_row = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
+
+        return response_delete_row
+
+    except:
+        raise
+
 def drive_ls(sa_secrets_file, cd_folder):
 
     try:
