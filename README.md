@@ -36,8 +36,9 @@ optional arguments:
                         file if created
 ```
 ```
+./docs.py --help
 usage: docs.py [-h] [--debug]
-               (--get-as-json ID | --replace-all-text ID JSON | --insert-table-row ID TABLE_NUM BELOW_ROW_NUMBER JSON)
+               (--get-as-json ID | --replace-all-text ID JSON | --insert-table-row ID TABLE_NUM BELOW_ROW_NUMBER JSON | --delete-table-row ID TABLE_NUM ROW_NUMBER)
 
 Script to automate specific operations with G Suite Docs.
 
@@ -51,8 +52,12 @@ optional arguments:
                         within google drive doc ID
   --insert-table-row ID TABLE_NUM BELOW_ROW_NUMBER JSON
                         insert row defined by JSON (e.g. '["Cell 1", "Cell
-                        2"]') into TABLE_NUM (table count starts from 1) below
-                        row number BELOW_ROW_NUMBER within google drive doc ID
+                        2"]') into TABLE_NUM (table, row count starts from 1)
+                        below row number BELOW_ROW_NUMBER within google drive
+                        doc ID
+  --delete-table-row ID TABLE_NUM ROW_NUMBER
+                        delete row ROW_NUMBER from TABLE_NUM (table, row count
+                        starts from 1) within google drive doc ID
 ```
 ```
 usage: sheets.py [-h] [--debug]
