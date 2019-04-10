@@ -36,7 +36,6 @@ optional arguments:
                         file if created
 ```
 ```
-./docs.py --help
 usage: docs.py [-h] [--debug]
                (--get-as-json ID | --replace-all-text ID JSON | --insert-table-row ID TABLE_NUM BELOW_ROW_NUMBER JSON | --delete-table-row ID TABLE_NUM ROW_NUMBER)
 
