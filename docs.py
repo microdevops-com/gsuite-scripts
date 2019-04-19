@@ -121,7 +121,7 @@ if __name__ == "__main__":
                 logger.info(response_delete_row)
 
             except Exception as e:
-                logger.error('Document {0} inserting row json {1} below {2} into table {3} failed'.format(doc_id, json_str, below_row_number, table_num))
+                logger.error('Document {0} deleting row {1} from table {2} failed'.format(doc_id, row_number, table_num))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
