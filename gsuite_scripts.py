@@ -71,7 +71,7 @@ def docs_replace_all_text(sa_secrets_file, doc_id, json_str):
     except:
         raise
 
-def docs_insert_table_row(sa_secrets_file, doc_id, table_num, below_row_number, json_str):
+def docs_insert_table_rows(sa_secrets_file, doc_id, table_num, below_row_number, json_str):
 
     try:
 
@@ -125,51 +125,53 @@ def docs_insert_table_row(sa_secrets_file, doc_id, table_num, below_row_number, 
         if table_index is None:
             raise ValueError("Table index for TABLE_NUM = {0} not found".format(table_num))
 
-        # Insert new row
-
-        requests = [
-            {
-                'insertTableRow': {
-                    'tableCellLocation': {
-                        'tableStartLocation': {
-                            'index': table_index
-                        },
-                        'rowIndex': below_row_index,
-                        'columnIndex': 0
-                    },
-                    'insertBelow': 'true'
-                }
-            }
-        ]
-
-        response_new_row = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
-
-        # Fill row values
+        # Iterate on first dimension of json_list - rows - starting from last row
         # As per https://developers.google.com/docs/api/how-tos/best-practices data should be filled backwards
-
+        # Populate requests list in iterations
+        
         requests = []
-        list_n = 0
-
         json_list.reverse()
+        for list_row in json_list:
 
-        for json_item in json_list:
-
+            # Insert new row
             requests = requests + [
                 {
-                    'insertText': {
-                        'location': {
-                            'index': row_end_index + ( 2 * (len(json_list) - list_n) )
+                    'insertTableRow': {
+                        'tableCellLocation': {
+                            'tableStartLocation': {
+                                'index': table_index
+                            },
+                            'rowIndex': below_row_index,
+                            'columnIndex': 0
                         },
-                        'text': json_item
+                        'insertBelow': 'true'
                     }
                 }
             ]
 
-            list_n += 1
+            # Fill row values, also backwards
 
-        response_values = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
+            list_n = 0
+            list_row.reverse()
 
-        return response_new_row, response_values
+            for list_cell in list_row:
+
+                requests = requests + [
+                    {
+                        'insertText': {
+                            'location': {
+                                'index': row_end_index + ( 2 * (len(list_row) - list_n) )
+                            },
+                            'text': list_cell
+                        }
+                    }
+                ]
+
+                list_n += 1
+
+        response = docs_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
+
+        return response
 
     except:
         raise

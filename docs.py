@@ -24,8 +24,8 @@ if __name__ == "__main__":
     group.add_argument("--get-as-json",         dest="get_as_json",         help="get google drive doc ID as json",     nargs=1,    metavar=("ID"))
     replace_all_text_help = "replace all text templates defined by JSON (e.g. '{\"__KEY1__\": \"Value 1\", \"__KEY2__\": \"Value 2\"}') within google drive doc ID"
     group.add_argument("--replace-all-text",    dest="replace_all_text",    help=replace_all_text_help,                 nargs=2,    metavar=("ID", "JSON"))
-    insert_table_row_help = "insert row defined by JSON (e.g. '[\"Cell 1\", \"Cell 2\"]') into TABLE_NUM (table, row count starts from 1) below row number BELOW_ROW_NUMBER within google drive doc ID"
-    group.add_argument("--insert-table-row",    dest="insert_table_row",    help=insert_table_row_help,                 nargs=4,    metavar=("ID", "TABLE_NUM", "BELOW_ROW_NUMBER", "JSON"))
+    insert_table_rows_help = "insert rows defined by JSON (e.g. '[[\"Cell 1-1\", \"Cell 1-2\"], [\"Cell 2-1\", \"Cell 2-2\"]]') into TABLE_NUM (table, row count starts from 1) below row number BELOW_ROW_NUMBER within google drive doc ID"
+    group.add_argument("--insert-table-rows",   dest="insert_table_rows",   help=insert_table_rows_help,                nargs=4,    metavar=("ID", "TABLE_NUM", "BELOW_ROW_NUMBER", "JSON"))
     delete_table_row_help = "delete row ROW_NUMBER from TABLE_NUM (table, row count starts from 1) within google drive doc ID"
     group.add_argument("--delete-table-row",    dest="delete_table_row",    help=delete_table_row_help,                 nargs=3,    metavar=("ID", "TABLE_NUM", "ROW_NUMBER"))
     args = parser.parse_args()
@@ -90,18 +90,16 @@ if __name__ == "__main__":
             logger.info("Finished script")
             sys.exit(0)
 
-        if args.insert_table_row:
+        if args.insert_table_rows:
             
             try:
 
-                doc_id, table_num, below_row_number, json_str = args.insert_table_row
+                doc_id, table_num, below_row_number, json_str = args.insert_table_rows
                 
-                response_new_row, response_values = docs_insert_table_row(SA_SECRETS_FILE, doc_id, table_num, below_row_number, json_str)
+                response = docs_insert_table_rows(SA_SECRETS_FILE, doc_id, table_num, below_row_number, json_str)
 
-                print(response_new_row)
-                logger.info(response_new_row)
-                print(response_values)
-                logger.info(response_values)
+                print(response)
+                logger.info(response)
 
             except Exception as e:
                 logger.error('Document {0} inserting row json {1} below {2} into table {3} failed'.format(doc_id, json_str, below_row_number, table_num))

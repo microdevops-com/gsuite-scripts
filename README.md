@@ -37,7 +37,7 @@ optional arguments:
 ```
 ```
 usage: docs.py [-h] [--debug]
-               (--get-as-json ID | --replace-all-text ID JSON | --insert-table-row ID TABLE_NUM BELOW_ROW_NUMBER JSON | --delete-table-row ID TABLE_NUM ROW_NUMBER)
+               (--get-as-json ID | --replace-all-text ID JSON | --insert-table-rows ID TABLE_NUM BELOW_ROW_NUMBER JSON | --delete-table-row ID TABLE_NUM ROW_NUMBER)
 
 Script to automate specific operations with G Suite Docs.
 
@@ -49,11 +49,11 @@ optional arguments:
                         replace all text templates defined by JSON (e.g.
                         '{"__KEY1__": "Value 1", "__KEY2__": "Value 2"}')
                         within google drive doc ID
-  --insert-table-row ID TABLE_NUM BELOW_ROW_NUMBER JSON
-                        insert row defined by JSON (e.g. '["Cell 1", "Cell
-                        2"]') into TABLE_NUM (table, row count starts from 1)
-                        below row number BELOW_ROW_NUMBER within google drive
-                        doc ID
+  --insert-table-rows ID TABLE_NUM BELOW_ROW_NUMBER JSON
+                        insert rows defined by JSON (e.g. '[["Cell 1-1", "Cell
+                        1-2"], ["Cell 2-1", "Cell 2-2"]]') into TABLE_NUM
+                        (table, row count starts from 1) below row number
+                        BELOW_ROW_NUMBER within google drive doc ID
   --delete-table-row ID TABLE_NUM ROW_NUMBER
                         delete row ROW_NUMBER from TABLE_NUM (table, row count
                         starts from 1) within google drive doc ID
