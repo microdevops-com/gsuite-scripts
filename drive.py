@@ -66,8 +66,8 @@ if __name__ == "__main__":
                     logger.info('no files found')
                 else:
                     for item in items:
-                        print('{0} {1}'.format(item['id'], item['name']))
-                        logger.info('{0} {1}'.format(item['id'], item['name']))
+                        print('{0} {1} {2}'.format(item['id'], item['name'], item['mimeType']))
+                        logger.info('{0} {1} {2}'.format(item['id'], item['name'], item['mimeType']))
 
             except Exception as e:
                 logger.error('Listing {0} failed'.format(cd_folder))

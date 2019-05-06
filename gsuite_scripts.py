@@ -271,14 +271,14 @@ def drive_ls(sa_secrets_file, cd_folder):
 
             # Try to list files, suppress errors
             try:
-                response = drive_service.files().list(pageSize=100, fields="nextPageToken, files(id, name)", pageToken=page_token, q=q).execute()
+                response = drive_service.files().list(pageSize=100, fields="nextPageToken, files(id, name, mimeType)", pageToken=page_token, q=q).execute()
                 items = response.get('files', [])
                 page_token = response.get('nextPageToken', None)
             except:
                 raise 
             
             for item in items:
-                return_items.append({'id': item['id'], 'name': item['name']})
+                return_items.append({'id': item['id'], 'name': item['name'], 'mimeType': item['mimeType']})
 
             if page_token is None:
                 break
