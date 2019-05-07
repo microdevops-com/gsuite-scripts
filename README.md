@@ -14,15 +14,15 @@ Commands use [IDs of Drive files](https://developers.google.com/drive/api/v3/abo
 
 ```
 usage: drive.py [-h] [--debug]
-                (--ls ID | --rm ID | --mkdir ID NAME | --cp ID CD NAME | --pdf ID NAME | --upload FILE CD NAME)
+                (--ls ID | --rm ID | --mkdir ID NAME | --cp ID CD NAME | --pdf ID NAME | --download ID NAME | --upload FILE CD NAME)
 
 Script to automate specific operations with G Suite Drive.
 
 optional arguments:
   -h, --help            show this help message and exit
   --debug               enable debug
-  --ls ID               returns id<space>name of files available in folder ID,
-                        use ID = ALL to list all available files
+  --ls ID               returns id<space>name<mimeType> of files available in
+                        folder ID, use ID = ALL to list all available files
   --rm ID               delete file ID (folders are also files in drive)
   --mkdir ID NAME       create folder NAME within folder ID, only if NAME does
                         not exist yet, returns ID of created or found folder
@@ -30,6 +30,7 @@ optional arguments:
                         does not exist yet, returns ID of created file if
                         created
   --pdf ID NAME         download file ID as pdf file NAME
+  --download ID NAME    download file ID as file NAME
   --upload FILE CD NAME
                         upload local FILE as NAME to google drive folder CD,
                         only if it does not exist yet, returns ID of created

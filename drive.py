@@ -21,7 +21,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script to automate specific operations with G Suite Drive.')
     parser.add_argument("--debug",              dest="debug",               help="enable debug",                        action="store_true")
     group = parser.add_mutually_exclusive_group(required=True)
-    ls_help = "returns id<space>name of files available in folder ID, use ID = ALL to list all available files"
+    ls_help = "returns id<space>name<mimeType> of files available in folder ID, use ID = ALL to list all available files"
     group.add_argument("--ls",                  dest="ls",                  help=ls_help,                               nargs=1,    metavar=("ID"))
     rm_help = "delete file ID (folders are also files in drive)"
     group.add_argument("--rm",                  dest="rm",                  help=rm_help,                               nargs=1,    metavar=("ID"))
