@@ -464,7 +464,7 @@ def gmail_create_draft(sa_secrets_file, gmail_user, message_from, message_to, me
         gmail_service = build('gmail', 'v1', credentials=delegated_credentials)
 
         message_text_new_lines = message_text.replace('\\n', '\n')
-        attach_dict = json.loads(attach_str)
+        attach_list = json.loads(attach_str)
 
         message = MIMEMultipart()
         message['From'] = message_from
@@ -475,7 +475,7 @@ def gmail_create_draft(sa_secrets_file, gmail_user, message_from, message_to, me
 
         message.attach(MIMEText(message_text_new_lines, "plain"))
 
-        for file_name in attach_dict:
+        for file_name in attach_list:
 
             with open(file_name, "rb") as attachment:
 
