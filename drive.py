@@ -30,6 +30,7 @@ if __name__ == "__main__":
     cp_help = "copy source file ID to folder CD with NAME, only if it does not exist yet, returns ID of created file if created"
     group.add_argument("--cp",                  dest="cp",                  help=cp_help,                               nargs=3,    metavar=("ID", "CD", "NAME"))
     group.add_argument("--pdf",                 dest="pdf",                 help="download file ID as pdf file NAME",   nargs=2,    metavar=("ID", "NAME"))
+    group.add_argument("--download",            dest="download",            help="download file ID as file NAME",       nargs=2,    metavar=("ID", "NAME"))
     upload_help = "upload local FILE as NAME to google drive folder CD, only if it does not exist yet, returns ID of created file if created"
     group.add_argument("--upload",              dest="upload",              help=upload_help,                           nargs=3,    metavar=("FILE", "CD", "NAME"))
     args = parser.parse_args()
@@ -142,6 +143,25 @@ if __name__ == "__main__":
                 file_id, file_name = args.pdf
                 
                 response = drive_pdf(SA_SECRETS_FILE, file_id, file_name)
+                print(response)
+                logger.info(response)
+
+            except Exception as e:
+                logger.error('Downloading of {0} as {1} failed'.format(file_id, file_name))
+                logger.info("Caught exception on execution:")
+                logger.info(e)
+                sys.exit(1)
+
+            logger.info("Finished script")
+            sys.exit(0)
+
+        if args.download:
+            
+            try:
+            
+                file_id, file_name = args.download
+                
+                response = drive_download(SA_SECRETS_FILE, file_id, file_name)
                 print(response)
                 logger.info(response)
 

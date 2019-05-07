@@ -385,6 +385,26 @@ def drive_pdf(sa_secrets_file, file_id, file_name):
     except:
         raise
 
+def drive_download(sa_secrets_file, file_id, file_name):
+
+    try:
+
+        credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
+        drive_service = build('drive', 'v3', credentials=credentials)
+
+        request = drive_service.files().get_media(fileId=file_id)
+
+        fh = io.FileIO(file_name, "wb")
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+        fh.close()
+        return status.progress() * 100
+
+    except:
+        raise
+
 def drive_upload(sa_secrets_file, file_local, cd_id, file_name):
 
     try:
