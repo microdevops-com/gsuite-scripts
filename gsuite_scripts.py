@@ -12,6 +12,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 import mimetypes
 from email import encoders
+import string
 
 # Constants
 DOCS_SCOPES = ['https://www.googleapis.com/auth/documents']
@@ -449,7 +450,36 @@ def sheets_get_as_json(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dime
         result = sheet.values().get(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), majorDimension=dimension, valueRenderOption=render, dateTimeRenderOption=datetime_render).execute()
         values = result.get('values', [])
 
-        return values
+        # Calculate range column size
+
+        num = 0
+        for c in range_id.split(":")[0]:
+            if c in string.ascii_letters:
+                num = num * 26 + (ord(c.upper()) - ord('A')) + 1
+        left_column = num
+        
+        num = 0
+        for c in range_id.split(":")[1]:
+            if c in string.ascii_letters:
+                num = num * 26 + (ord(c.upper()) - ord('A')) + 1
+        right_column = num
+
+        range_size = right_column - left_column + 1
+
+        # Sheets api omits row tail if its values are empty
+        # Rebuild values filling tails with empty strings truncated tails
+
+        new_values = []
+        for row in values:
+            new_row = []
+            for col_num in range(range_size):
+                try:
+                    new_row.append(row[col_num])
+                except IndexError:
+                    new_row.append("")
+            new_values.append(new_row)
+
+        return new_values
 
     except:
         raise
