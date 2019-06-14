@@ -570,3 +570,19 @@ def gmail_list_messages(sa_secrets_file, gmail_user):
 
     except:
         raise
+
+def gmail_send_draft(sa_secrets_file, gmail_user, draft_id):
+
+    try:
+
+        credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=GMAIL_SCOPES)
+        delegated_credentials = credentials.with_subject(gmail_user)
+        gmail_service = build('gmail', 'v1', credentials=delegated_credentials)
+
+        body = {'id': draft_id}
+        message = gmail_service.users().drafts().send(userId='me', body=body).execute()
+
+        return message
+
+    except:
+        raise

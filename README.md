@@ -83,7 +83,7 @@ optional arguments:
 ```
 ```
 usage: gmail.py [-h] [--debug]
-                (--create-draft USER FROM TO CC BCC SUBJECT TEXT ATTACH | --list-messages USER)
+                (--create-draft USER FROM TO CC BCC SUBJECT TEXT ATTACH | --send-draft USER DRAFT_ID | --list-messages USER)
 
 Script to automate specific operations with Gmail.
 
@@ -100,6 +100,8 @@ optional arguments:
                         cc@acme.com' 'bcc@acme.com' 'Subject may contain UTF -
                         перевірка チェックする' 'Message may contain UTF and
                         new\nlines\nперевірка\nチェックする' '["a.pdf", "b.pdf"]'
+  --send-draft USER DRAFT_ID
+                        send draft DRAFT_ID inside USER gmail
   --list-messages USER  list messages available to gmail USER
 ```
 ## Required envs for commands

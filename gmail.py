@@ -24,6 +24,8 @@ if __name__ == "__main__":
     create_draft_help = """create draft inside USER gmail, from email FROM to email(s) TO, CC, BCC with SUBJECT and TEXT, and attach local files listed with json list ATTACH,
                            e.g. --create-draft me@example.com '"Me Myself" <me@example.com>' '"Client 1" <client1@acme.com>, "Client 2" <client2@acme.com>' '"Someone Other" cc@acme.com' 'bcc@acme.com' 'Subject may contain UTF - перевірка チェックする' 'Message may contain UTF and new\\nlines\\nперевірка\\nチェックする' '["a.pdf", "b.pdf"]'"""
     group.add_argument("--create-draft",        dest="create_draft",        help=create_draft_help,                     nargs=8,    metavar=("USER", "FROM", "TO", "CC", "BCC", "SUBJECT", "TEXT", "ATTACH"))
+    send_draft_help = "send draft DRAFT_ID inside USER gmail"
+    group.add_argument("--send-draft",          dest="send_draft",          help=send_draft_help,                       nargs=2,    metavar=("USER", "DRAFT_ID"))
     list_messages_help = "list messages available to gmail USER"
     group.add_argument("--list-messages",       dest="list_messages",       help=list_messages_help,                    nargs=1,    metavar=("USER"))
     args = parser.parse_args()
@@ -82,6 +84,26 @@ if __name__ == "__main__":
 
             except Exception as e:
                 logger.error('Listing messages for user {0} failed'.format(gmail_user))
+                logger.info("Caught exception on execution:")
+                logger.info(e)
+                sys.exit(1)
+            
+            logger.info("Finished script")
+            sys.exit(0)
+
+        if args.send_draft:
+            
+            try:
+            
+                gmail_user, draft_id = args.send_draft
+
+                message = gmail_send_draft(SA_SECRETS_FILE, gmail_user, draft_id)
+
+                print("Message {0} sent, labels: {1}".format(message["id"], message["labelIds"]))
+                logger.info("Message {0} sent, labels: {1}".format(message["id"], message["labelIds"]))
+
+            except Exception as e:
+                logger.error('Sending draft for user {0} failed'.format(gmail_user))
                 logger.info("Caught exception on execution:")
                 logger.info(e)
                 sys.exit(1)
