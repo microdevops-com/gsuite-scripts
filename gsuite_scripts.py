@@ -498,7 +498,7 @@ def sheets_append_data(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dime
             "values": json_dict
         }
 
-        response = sheets_service.spreadsheets().values().append(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), valueInputOption="USER_ENTERED", insertDataOption="INSERT_ROWS", body=request).execute()
+        response = sheets_service.spreadsheets().values().append(spreadsheetId=spreadsheet_id, range="{0}!{1}".format(sheet_id, range_id), valueInputOption="RAW", insertDataOption="INSERT_ROWS", body=request).execute()
 
         return response
 
