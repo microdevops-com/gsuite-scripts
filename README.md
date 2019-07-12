@@ -183,3 +183,6 @@ https://mail.google.com/,https://www.googleapis.com/auth/gmail.compose,https://w
 # Notes on Script API
 Script API and JS Scripts are **NOT** used - people often use those mechanisms to manipulate data within docs and sheets, but there are native API calls for docs and sheets that do the very same.
 Also, Script API [cannot be used with service accounts](https://issuetracker.google.com/issues/36763096), which is the simpliest OAuth way.
+
+# Notes on Sheets and Apostrophe
+Scripts use valueInputOption=RAW instead of USER_ENTERED. With both options after append some cells could contain leading apostrophe `'`. To fix this behaviour Format - Plain text should be set for the column.
