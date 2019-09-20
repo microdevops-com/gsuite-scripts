@@ -45,8 +45,7 @@ if __name__ == "__main__":
 
         # Check env vars and connects
         if SA_SECRETS_FILE is None:
-            logger.error("Env var SA_SECRETS_FILE missing")
-            sys.exit(1)
+            raise Exception("Env var SA_SECRETS_FILE missing")
         
         # Do tasks
 
@@ -62,14 +61,8 @@ if __name__ == "__main__":
                 logger.info("Draft {0} with message {1} created".format(draft_id, draft_message))
 
             except Exception as e:
-                logger.error('Creating draft for user {0} failed'.format(gmail_user))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Creating draft for user {0} failed'.format(gmail_user))
             
-            logger.info("Finished script")
-            sys.exit(0)
-        
         if args.list_messages:
             
             try:
@@ -83,14 +76,8 @@ if __name__ == "__main__":
                     logger.info(item)
 
             except Exception as e:
-                logger.error('Listing messages for user {0} failed'.format(gmail_user))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Listing messages for user {0} failed'.format(gmail_user))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
         if args.send_draft:
             
             try:
@@ -103,16 +90,12 @@ if __name__ == "__main__":
                 logger.info("Message {0} sent, labels: {1}".format(message["id"], message["labelIds"]))
 
             except Exception as e:
-                logger.error('Sending draft for user {0} failed'.format(gmail_user))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Sending draft for user {0} failed'.format(gmail_user))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
     # Reroute catched exception to log
     except Exception as e:
         logger.exception(e)
         logger.info("Finished script with errors")
         sys.exit(1)
+            
+    logger.info("Finished script")

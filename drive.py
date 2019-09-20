@@ -50,8 +50,7 @@ if __name__ == "__main__":
 
         # Check env vars and connects
         if SA_SECRETS_FILE is None:
-            logger.error("Env var SA_SECRETS_FILE missing")
-            sys.exit(1)
+            raise Exception("Env var SA_SECRETS_FILE missing")
         
         # Do tasks
 
@@ -71,13 +70,7 @@ if __name__ == "__main__":
                         logger.info('{0} {1} {2}'.format(item['id'], item['name'], item['mimeType']))
 
             except Exception as e:
-                logger.error('Listing {0} failed'.format(cd_folder))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
-
-            logger.info("Finished script")
-            sys.exit(0)
+                raise Exception('Listing {0} failed'.format(cd_folder))
 
         if args.rm:
            
@@ -90,14 +83,8 @@ if __name__ == "__main__":
                 logger.info(response)
 
             except Exception as e:
-                logger.error('Deleting {0} failed'.format(file_id))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Deleting {0} failed'.format(file_id))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
         if args.mkdir:
             
             try:
@@ -109,14 +96,8 @@ if __name__ == "__main__":
                 logger.info(response)
 
             except Exception as e:
-                logger.error('Creating {0} in folder ID {1} failed'.format(folder_name, in_id))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Creating {0} in folder ID {1} failed'.format(folder_name, in_id))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
         if args.cp:
             
             try:
@@ -128,13 +109,7 @@ if __name__ == "__main__":
                 logger.info(response)
 
             except Exception as e:
-                logger.error('Copying of {0} with name {1} in folder ID {2} failed'.format(source_id, file_name, cd_id))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
-
-            logger.info("Finished script")
-            sys.exit(0)
+                raise Exception('Copying of {0} with name {1} in folder ID {2} failed'.format(source_id, file_name, cd_id))
 
         if args.pdf:
             
@@ -147,13 +122,7 @@ if __name__ == "__main__":
                 logger.info(response)
 
             except Exception as e:
-                logger.error('Downloading of {0} as {1} failed'.format(file_id, file_name))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
-
-            logger.info("Finished script")
-            sys.exit(0)
+                raise Exception('Downloading of {0} as {1} failed'.format(file_id, file_name))
 
         if args.download:
             
@@ -166,13 +135,7 @@ if __name__ == "__main__":
                 logger.info(response)
 
             except Exception as e:
-                logger.error('Downloading of {0} as {1} failed'.format(file_id, file_name))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
-
-            logger.info("Finished script")
-            sys.exit(0)
+                raise Exception('Downloading of {0} as {1} failed'.format(file_id, file_name))
 
         if args.upload:
             
@@ -185,16 +148,12 @@ if __name__ == "__main__":
                 logger.info(response)
 
             except Exception as e:
-                logger.error('Uploading of {0} with name {1} in folder ID {2} failed'.format(file_local, file_name, cd_id))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
-
-            logger.info("Finished script")
-            sys.exit(0)
+                raise Exception('Uploading of {0} with name {1} in folder ID {2} failed'.format(file_local, file_name, cd_id))
 
     # Reroute catched exception to log
     except Exception as e:
         logger.exception(e)
         logger.info("Finished script with errors")
         sys.exit(1)
+            
+    logger.info("Finished script")

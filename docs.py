@@ -45,8 +45,7 @@ if __name__ == "__main__":
 
         # Check env vars and connects
         if SA_SECRETS_FILE is None:
-            logger.error("Env var SA_SECRETS_FILE missing")
-            sys.exit(1)
+            raise Exception("Env var SA_SECRETS_FILE missing")
         
         # Do tasks
 
@@ -62,14 +61,8 @@ if __name__ == "__main__":
                 logger.info(json.dumps(response))
 
             except Exception as e:
-                logger.error('Getting document {0} failled'.format(doc_id))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Getting document {0} failled'.format(doc_id))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
         if args.replace_all_text:
 
             try:
@@ -82,14 +75,8 @@ if __name__ == "__main__":
                 logger.info(response)
 
             except Exception as e:
-                logger.error('Document {0} replacing all text templates {1} failed'.format(doc_id, json_str))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Document {0} replacing all text templates {1} failed'.format(doc_id, json_str))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
         if args.insert_table_rows:
             
             try:
@@ -102,10 +89,7 @@ if __name__ == "__main__":
                 logger.info(response)
 
             except Exception as e:
-                logger.error('Document {0} inserting row json {1} below {2} into table {3} failed'.format(doc_id, json_str, below_row_number, table_num))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Document {0} inserting row json {1} below {2} into table {3} failed'.format(doc_id, json_str, below_row_number, table_num))
 
         if args.delete_table_row:
             
@@ -119,16 +103,12 @@ if __name__ == "__main__":
                 logger.info(response_delete_row)
 
             except Exception as e:
-                logger.error('Document {0} deleting row {1} from table {2} failed'.format(doc_id, row_number, table_num))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Document {0} deleting row {1} from table {2} failed'.format(doc_id, row_number, table_num))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
     # Reroute catched exception to log
     except Exception as e:
         logger.exception(e)
         logger.info("Finished script with errors")
         sys.exit(1)
+
+    logger.info("Finished script")

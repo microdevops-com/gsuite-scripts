@@ -47,8 +47,7 @@ if __name__ == "__main__":
 
         # Check env vars and connects
         if SA_SECRETS_FILE is None:
-            logger.error("Env var SA_SECRETS_FILE missing")
-            sys.exit(1)
+            raise Exception("Env var SA_SECRETS_FILE missing")
         
         # Do tasks
 
@@ -64,14 +63,8 @@ if __name__ == "__main__":
                 logger.info(json.dumps(response))
 
             except Exception as e:
-                logger.error('Getting spreadsheet {0} sheet {1} range {2} failed'.format(spreadsheet_id, sheet_id, range_id))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Getting spreadsheet {0} sheet {1} range {2} failed'.format(spreadsheet_id, sheet_id, range_id))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
         if args.append_data:
             
             try:
@@ -84,16 +77,12 @@ if __name__ == "__main__":
 
 
             except Exception as e:
-                logger.error('Getting spreadsheet {0} sheet {1} range {2} failed'.format(spreadsheet_id, sheet_id, range_id))
-                logger.info("Caught exception on execution:")
-                logger.info(e)
-                sys.exit(1)
+                raise Exception('Getting spreadsheet {0} sheet {1} range {2} failed'.format(spreadsheet_id, sheet_id, range_id))
             
-            logger.info("Finished script")
-            sys.exit(0)
-
     # Reroute catched exception to log
     except Exception as e:
         logger.exception(e)
         logger.info("Finished script with errors")
         sys.exit(1)
+            
+    logger.info("Finished script")
