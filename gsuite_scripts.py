@@ -13,8 +13,10 @@ from email.mime.base import MIMEBase
 import mimetypes
 from email import encoders
 import string
+from retrying import retry
 
 # Constants
+GSUITE_RETRIES = 3
 DOCS_SCOPES = ['https://www.googleapis.com/auth/documents']
 DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
 SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -26,6 +28,7 @@ GMAIL_SCOPES = [
     'https://www.googleapis.com/auth/gmail.send'
 ]
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def docs_get_as_json(sa_secrets_file, doc_id):
 
     try:
@@ -40,6 +43,7 @@ def docs_get_as_json(sa_secrets_file, doc_id):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def docs_replace_all_text(sa_secrets_file, doc_id, json_str):
 
     try:
@@ -72,6 +76,7 @@ def docs_replace_all_text(sa_secrets_file, doc_id, json_str):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def docs_insert_table_rows(sa_secrets_file, doc_id, table_num, below_row_number, json_str):
 
     try:
@@ -177,6 +182,7 @@ def docs_insert_table_rows(sa_secrets_file, doc_id, table_num, below_row_number,
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def docs_delete_table_row(sa_secrets_file, doc_id, table_num, row_number):
 
     try:
@@ -253,6 +259,7 @@ def docs_delete_table_row(sa_secrets_file, doc_id, table_num, row_number):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def drive_ls(sa_secrets_file, cd_folder):
 
     try:
@@ -289,6 +296,7 @@ def drive_ls(sa_secrets_file, cd_folder):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def drive_rm(sa_secrets_file, file_id):
 
     try:
@@ -301,6 +309,7 @@ def drive_rm(sa_secrets_file, file_id):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def drive_mkdir(sa_secrets_file, in_id, folder_name):
 
     try:
@@ -334,6 +343,7 @@ def drive_mkdir(sa_secrets_file, in_id, folder_name):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def drive_cp(sa_secrets_file, source_id, cd_id, file_name):
 
     try:
@@ -366,6 +376,7 @@ def drive_cp(sa_secrets_file, source_id, cd_id, file_name):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def drive_pdf(sa_secrets_file, file_id, file_name):
 
     try:
@@ -386,6 +397,7 @@ def drive_pdf(sa_secrets_file, file_id, file_name):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def drive_download(sa_secrets_file, file_id, file_name):
 
     try:
@@ -406,6 +418,7 @@ def drive_download(sa_secrets_file, file_id, file_name):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def drive_upload(sa_secrets_file, file_local, cd_id, file_name):
 
     try:
@@ -439,6 +452,7 @@ def drive_upload(sa_secrets_file, file_local, cd_id, file_name):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def sheets_get_as_json(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dimension, render, datetime_render):
 
     try:
@@ -484,6 +498,7 @@ def sheets_get_as_json(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dime
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def sheets_append_data(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dimension, json_str):
 
     try:
@@ -505,6 +520,7 @@ def sheets_append_data(sa_secrets_file, spreadsheet_id, sheet_id, range_id, dime
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def gmail_create_draft(sa_secrets_file, gmail_user, message_from, message_to, message_cc, message_bcc, message_subject, message_text, attach_str):
 
     try:
@@ -547,6 +563,7 @@ def gmail_create_draft(sa_secrets_file, gmail_user, message_from, message_to, me
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def gmail_list_messages(sa_secrets_file, gmail_user):
 
     try:
@@ -571,6 +588,7 @@ def gmail_list_messages(sa_secrets_file, gmail_user):
     except:
         raise
 
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
 def gmail_send_draft(sa_secrets_file, gmail_user, draft_id):
 
     try:
