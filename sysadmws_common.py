@@ -70,7 +70,7 @@ def set_logger(console_level, log_dir, log_file):
     log_handler.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler()
     console_handler.setLevel(console_level)
-    formatter = logging.Formatter('{0} %(name)s %(process)d/%(threadName)s %(levelname)s: %(message)s'.format(datetime.datetime.now().strftime("%F %T")))
+    formatter = logging.Formatter(fmt='%(asctime)s %(filename)s %(name)s %(process)d/%(threadName)s %(levelname)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S %Z")
     log_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
     logger.addHandler(log_handler)
