@@ -21,8 +21,11 @@ Script to automate specific operations with G Suite Drive.
 optional arguments:
   -h, --help            show this help message and exit
   --debug               enable debug
-  --ls ID               returns id<space>name<mimeType> of files available in
+  --user USER           impersonate USER using domain wide delegation
+  --ls ID               returns 'id name mimeType' of files available in
                         folder ID, use ID = ALL to list all available files
+  --ls-perms ID         returns 'id type emailAddress role' permissions of of
+                        file or folder ID
   --rm ID               delete file ID (folders are also files in drive)
   --mkdir ID NAME       create folder NAME within folder ID, only if NAME does
                         not exist yet, returns ID of created or found folder
@@ -115,12 +118,13 @@ from gsuite_scripts import *
 response = docs_get_as_json(SA_SECRETS_FILE, doc_id)
 response = docs_replace_all_text(SA_SECRETS_FILE, doc_id, json_str)
 response_new_row, response_values = docs_insert_table_row(SA_SECRETS_FILE, doc_id, table_num, below_row_number, json_str)
-items = drive_ls(SA_SECRETS_FILE, cd_folder)
-response = drive_rm(SA_SECRETS_FILE, file_id)
-response = drive_mkdir(SA_SECRETS_FILE, in_id, folder_name)
-response = drive_cp(SA_SECRETS_FILE, source_id, cd_id, file_name)
-response = drive_pdf(SA_SECRETS_FILE, file_id, file_name)
-response = drive_upload(SA_SECRETS_FILE, file_local, cd_id, file_name)
+items = drive_ls(SA_SECRETS_FILE, cd_folder, drive_user=None)
+items = drive_ls_perms(sa_secrets_file, ls_perms_id, drive_user=None)
+response = drive_rm(SA_SECRETS_FILE, file_id, drive_user=None)
+response = drive_mkdir(SA_SECRETS_FILE, in_id, folder_name, drive_user=None)
+response = drive_cp(SA_SECRETS_FILE, source_id, cd_id, file_name, drive_user=None)
+response = drive_pdf(SA_SECRETS_FILE, file_id, file_name, drive_user=None)
+response = drive_upload(SA_SECRETS_FILE, file_local, cd_id, file_name, drive_user=None)
 response = sheets_get_as_json(SA_SECRETS_FILE, spreadsheet_id, sheet_id, range_id, dimension, render, datetime_render)
 response = sheets_append_data(SA_SECRETS_FILE, spreadsheet_id, sheet_id, range_id, dimension, json_str)
 draft_id, draft_message = gmail_create_draft(SA_SECRETS_FILE, gmail_user, message_from, message_to, message_cc, message_bcc, message_subject, message_text, attach_str)
@@ -144,13 +148,6 @@ Create JSON secrets file for the Service Account and save it in a safe place acc
 
 Note the Service Account email (...@...iam.gserviceaccount.com) - you will need it.
 
-### Drive
-Create folder you want to manipulate with scripts.
-
-Share access to the folder with Service Account's email.
-
-**Caution**: if you delete service account, all files created by service account will also be deleted. Transfer files ownership beforehand.
-
 ### Gmail
 If you need to create drafts within Gmail with scripts, you need to enable Domain-wide delegation for Service Account.
 It is not required for Drive, but there is no other way to delegate mailbox control to Service Account for Gmail.
@@ -172,7 +169,7 @@ Check Enable G Suite Domain-wide Delegation.
 
 Note Client ID (all digits) of Service Account after enabling.
 
-Go to G Suite Admin -> Security -> Advanced -> Manage API Client Access.
+Go to G Suite Admin -> Security -> API Controls -> Manage Domain-Wide Delegation.
 
 In the Client name field enter the service account's Client ID.
 
@@ -180,6 +177,21 @@ Set Scopes for Gmail:
 ```
 https://mail.google.com/,https://www.googleapis.com/auth/gmail.compose,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/gmail.readonly,https://www.googleapis.com/auth/gmail.send
 ```
+
+### Drive
+Create folder you want to manipulate with scripts.
+
+Share access to the folder with Service Account's email.
+
+**Caution**: if you delete service account, all files created by service account will also be deleted. Transfer files ownership beforehand.
+
+If you need to make Google Takeout of documents made you'd better impersonate to non Service Account user.
+
+Set Scopes for Drive to be able to impersonate:
+```
+https://www.googleapis.com/auth/drive'
+```
+
 # Notes on Script API
 Script API and JS Scripts are **NOT** used - people often use those mechanisms to manipulate data within docs and sheets, but there are native API calls for docs and sheets that do the very same.
 Also, Script API [cannot be used with service accounts](https://issuetracker.google.com/issues/36763096), which is the simpliest OAuth way.

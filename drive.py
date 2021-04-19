@@ -20,19 +20,34 @@ if __name__ == "__main__":
     # Set parser and parse args
     parser = argparse.ArgumentParser(description='Script to automate specific operations with G Suite Drive.')
     parser.add_argument("--debug",              dest="debug",               help="enable debug",                        action="store_true")
+
+    user_help = "impersonate USER using domain wide delegation"
+    parser.add_argument("--user",               dest="user",                help=user_help,                             nargs=1,    metavar=("USER"))
+
     group = parser.add_mutually_exclusive_group(required=True)
-    ls_help = "returns id<space>name<mimeType> of files available in folder ID, use ID = ALL to list all available files"
+
+    ls_help = "returns 'id name mimeType' of files available in folder ID, use ID = ALL to list all available files"
     group.add_argument("--ls",                  dest="ls",                  help=ls_help,                               nargs=1,    metavar=("ID"))
+
+    ls_perms_help = "returns 'id type emailAddress role' permissions of of file or folder ID"
+    group.add_argument("--ls-perms",            dest="ls_perms",            help=ls_perms_help,                         nargs=1,    metavar=("ID"))
+
     rm_help = "delete file ID (folders are also files in drive)"
     group.add_argument("--rm",                  dest="rm",                  help=rm_help,                               nargs=1,    metavar=("ID"))
+
     mkdir_help = "create folder NAME within folder ID, only if NAME does not exist yet, returns ID of created or found folder"
     group.add_argument("--mkdir",               dest="mkdir",               help=mkdir_help,                            nargs=2,    metavar=("ID", "NAME"))
+
     cp_help = "copy source file ID to folder CD with NAME, only if it does not exist yet, returns ID of created file if created"
     group.add_argument("--cp",                  dest="cp",                  help=cp_help,                               nargs=3,    metavar=("ID", "CD", "NAME"))
+
     group.add_argument("--pdf",                 dest="pdf",                 help="download file ID as pdf file NAME",   nargs=2,    metavar=("ID", "NAME"))
+
     group.add_argument("--download",            dest="download",            help="download file ID as file NAME",       nargs=2,    metavar=("ID", "NAME"))
+
     upload_help = "upload local FILE as NAME to google drive folder CD, only if it does not exist yet, returns ID of created file if created"
     group.add_argument("--upload",              dest="upload",              help=upload_help,                           nargs=3,    metavar=("FILE", "CD", "NAME"))
+
     args = parser.parse_args()
 
     # Set logger and console debug
@@ -51,6 +66,12 @@ if __name__ == "__main__":
         # Check env vars and connects
         if SA_SECRETS_FILE is None:
             raise Exception("Env var SA_SECRETS_FILE missing")
+
+        # User
+        if args.user:
+            imp_user, = args.user
+        else:
+            imp_user = None
         
         # Do tasks
 
@@ -60,7 +81,7 @@ if __name__ == "__main__":
 
                 cd_folder, = args.ls
 
-                items = drive_ls(SA_SECRETS_FILE, cd_folder)
+                items = drive_ls(SA_SECRETS_FILE, cd_folder, imp_user)
             
                 if not items:
                     logger.info('no files found')
@@ -72,13 +93,31 @@ if __name__ == "__main__":
             except Exception as e:
                 raise Exception('Listing {0} failed'.format(cd_folder))
 
+        if args.ls_perms:
+
+            try:
+
+                ls_perms_id, = args.ls_perms
+
+                items = drive_ls_perms(SA_SECRETS_FILE, ls_perms_id, imp_user)
+
+                if not items:
+                    logger.info('no permissions found')
+                else:
+                    for item in items:
+                        print('{0} {1} {2} {3}'.format(item['id'], item['type'], item['emailAddress'], item['role']))
+                        logger.info('{0} {1} {2} {3}'.format(item['id'], item['type'], item['emailAddress'], item['role']))
+
+            except Exception as e:
+                raise Exception('Listing permissions {0} failed'.format(ls_perms_id))
+
         if args.rm:
            
             try:
             
                 file_id, = args.rm
 
-                response = drive_rm(SA_SECRETS_FILE, file_id)
+                response = drive_rm(SA_SECRETS_FILE, file_id, imp_user)
                 print(response)
                 logger.info(response)
 
@@ -91,7 +130,7 @@ if __name__ == "__main__":
             
                 in_id, folder_name = args.mkdir
 
-                response = drive_mkdir(SA_SECRETS_FILE, in_id, folder_name)
+                response = drive_mkdir(SA_SECRETS_FILE, in_id, folder_name, imp_user)
                 print(response)
                 logger.info(response)
 
@@ -104,7 +143,7 @@ if __name__ == "__main__":
             
                 source_id, cd_id, file_name = args.cp
 
-                response = drive_cp(SA_SECRETS_FILE, source_id, cd_id, file_name)
+                response = drive_cp(SA_SECRETS_FILE, source_id, cd_id, file_name, imp_user)
                 print(response)
                 logger.info(response)
 
@@ -117,7 +156,7 @@ if __name__ == "__main__":
             
                 file_id, file_name = args.pdf
                 
-                response = drive_pdf(SA_SECRETS_FILE, file_id, file_name)
+                response = drive_pdf(SA_SECRETS_FILE, file_id, file_name, imp_user)
                 print(response)
                 logger.info(response)
 
@@ -130,7 +169,7 @@ if __name__ == "__main__":
             
                 file_id, file_name = args.download
                 
-                response = drive_download(SA_SECRETS_FILE, file_id, file_name)
+                response = drive_download(SA_SECRETS_FILE, file_id, file_name, imp_user)
                 print(response)
                 logger.info(response)
 
@@ -143,7 +182,7 @@ if __name__ == "__main__":
             
                 file_local, cd_id, file_name = args.upload
 
-                response = drive_upload(SA_SECRETS_FILE, file_local, cd_id, file_name)
+                response = drive_upload(SA_SECRETS_FILE, file_local, cd_id, file_name, imp_user)
                 print(response)
                 logger.info(response)
 

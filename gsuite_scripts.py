@@ -260,12 +260,16 @@ def docs_delete_table_row(sa_secrets_file, doc_id, table_num, row_number):
         raise
 
 @retry(stop_max_attempt_number=GSUITE_RETRIES)
-def drive_ls(sa_secrets_file, cd_folder):
+def drive_ls(sa_secrets_file, cd_folder, drive_user=None):
 
     try:
 
         credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
-        drive_service = build('drive', 'v3', credentials=credentials)
+        if drive_user is None:
+            drive_service = build('drive', 'v3', credentials=credentials)
+        else:
+            delegated_credentials = credentials.with_subject(drive_user)
+            drive_service = build('drive', 'v3', credentials=delegated_credentials)
 
         page_token = None
         return_items = []
@@ -297,12 +301,52 @@ def drive_ls(sa_secrets_file, cd_folder):
         raise
 
 @retry(stop_max_attempt_number=GSUITE_RETRIES)
-def drive_rm(sa_secrets_file, file_id):
+def drive_ls_perms(sa_secrets_file, ls_perms_id, drive_user=None):
 
     try:
 
         credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
-        drive_service = build('drive', 'v3', credentials=credentials)
+        if drive_user is None:
+            drive_service = build('drive', 'v3', credentials=credentials)
+        else:
+            delegated_credentials = credentials.with_subject(drive_user)
+            drive_service = build('drive', 'v3', credentials=delegated_credentials)
+
+        page_token = None
+        return_items = []
+
+        while True:
+
+            # Try to list files, suppress errors
+            try:
+                response = drive_service.permissions().list(pageSize=100, fields="nextPageToken, permissions(id, type, emailAddress, role)", pageToken=page_token, fileId=ls_perms_id).execute()
+                items = response.get('permissions', [])
+                page_token = response.get('nextPageToken', None)
+            except:
+                raise
+
+            for item in items:
+                return_items.append({'id': item['id'], 'type': item['type'], 'emailAddress': item['emailAddress'], 'role': item['role']})
+
+            if page_token is None:
+                break
+
+        return return_items
+
+    except:
+        raise
+
+@retry(stop_max_attempt_number=GSUITE_RETRIES)
+def drive_rm(sa_secrets_file, file_id, drive_user=None):
+
+    try:
+
+        credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
+        if drive_user is None:
+            drive_service = build('drive', 'v3', credentials=credentials)
+        else:
+            delegated_credentials = credentials.with_subject(drive_user)
+            drive_service = build('drive', 'v3', credentials=delegated_credentials)
 
         return drive_service.files().delete(fileId=file_id).execute()
 
@@ -310,12 +354,17 @@ def drive_rm(sa_secrets_file, file_id):
         raise
 
 @retry(stop_max_attempt_number=GSUITE_RETRIES)
-def drive_mkdir(sa_secrets_file, in_id, folder_name):
+def drive_mkdir(sa_secrets_file, in_id, folder_name, drive_user=None):
 
     try:
 
         credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
-        drive_service = build('drive', 'v3', credentials=credentials)
+        if drive_user is None:
+            drive_service = build('drive', 'v3', credentials=credentials)
+        else:
+            print(drive_user)
+            delegated_credentials = credentials.with_subject(drive_user)
+            drive_service = build('drive', 'v3', credentials=delegated_credentials)
 
         # Query if the same file already exists
         q = "'{0}' in parents and name = '{1}'".format(in_id, folder_name)
@@ -344,12 +393,16 @@ def drive_mkdir(sa_secrets_file, in_id, folder_name):
         raise
 
 @retry(stop_max_attempt_number=GSUITE_RETRIES)
-def drive_cp(sa_secrets_file, source_id, cd_id, file_name):
+def drive_cp(sa_secrets_file, source_id, cd_id, file_name, drive_user=None):
 
     try:
 
         credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
-        drive_service = build('drive', 'v3', credentials=credentials)
+        if drive_user is None:
+            drive_service = build('drive', 'v3', credentials=credentials)
+        else:
+            delegated_credentials = credentials.with_subject(drive_user)
+            drive_service = build('drive', 'v3', credentials=delegated_credentials)
 
         # Query if the same file already exists
         q = "'{0}' in parents and name = '{1}'".format(cd_id, file_name)
@@ -377,12 +430,16 @@ def drive_cp(sa_secrets_file, source_id, cd_id, file_name):
         raise
 
 @retry(stop_max_attempt_number=GSUITE_RETRIES)
-def drive_pdf(sa_secrets_file, file_id, file_name):
+def drive_pdf(sa_secrets_file, file_id, file_name, drive_user=None):
 
     try:
 
         credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
-        drive_service = build('drive', 'v3', credentials=credentials)
+        if drive_user is None:
+            drive_service = build('drive', 'v3', credentials=credentials)
+        else:
+            delegated_credentials = credentials.with_subject(drive_user)
+            drive_service = build('drive', 'v3', credentials=delegated_credentials)
 
         request = drive_service.files().export_media(fileId=file_id, mimeType='application/pdf')
 
@@ -398,12 +455,16 @@ def drive_pdf(sa_secrets_file, file_id, file_name):
         raise
 
 @retry(stop_max_attempt_number=GSUITE_RETRIES)
-def drive_download(sa_secrets_file, file_id, file_name):
+def drive_download(sa_secrets_file, file_id, file_name, drive_user=None):
 
     try:
 
         credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
-        drive_service = build('drive', 'v3', credentials=credentials)
+        if drive_user is None:
+            drive_service = build('drive', 'v3', credentials=credentials)
+        else:
+            delegated_credentials = credentials.with_subject(drive_user)
+            drive_service = build('drive', 'v3', credentials=delegated_credentials)
 
         request = drive_service.files().get_media(fileId=file_id)
 
@@ -419,12 +480,16 @@ def drive_download(sa_secrets_file, file_id, file_name):
         raise
 
 @retry(stop_max_attempt_number=GSUITE_RETRIES)
-def drive_upload(sa_secrets_file, file_local, cd_id, file_name):
+def drive_upload(sa_secrets_file, file_local, cd_id, file_name, drive_user=None):
 
     try:
 
         credentials = service_account.Credentials.from_service_account_file(sa_secrets_file, scopes=DRIVE_SCOPES)
-        drive_service = build('drive', 'v3', credentials=credentials)
+        if drive_user is None:
+            drive_service = build('drive', 'v3', credentials=credentials)
+        else:
+            delegated_credentials = credentials.with_subject(drive_user)
+            drive_service = build('drive', 'v3', credentials=delegated_credentials)
 
         # Query if the same file already exists
         q = "'{0}' in parents and name = '{1}'".format(cd_id, file_name)
